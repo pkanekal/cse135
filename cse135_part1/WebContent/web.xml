@@ -26,7 +26,7 @@
 	</servlet-mapping>
 		<servlet-mapping>
 		<servlet-name>loginservlet</servlet-name>
-		<url-pattern>/loginservlet</url-pattern>
+		<url-pattern>LoginServlet.java</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>
