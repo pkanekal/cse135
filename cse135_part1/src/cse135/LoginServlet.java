@@ -40,7 +40,8 @@ public class LoginServlet extends HttpServlet {
         }
         try {
             Connection con = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/myDb", "root", "");
+            		"jdbc:postgresql://localhost/cse135?" +
+            		"user=postgres&password=postgres");
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(searchQuery);
             boolean isEmpty = rs.next();
