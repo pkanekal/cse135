@@ -16,8 +16,6 @@
             
             Connection conn = null;
             PreparedStatement pstmt = null;
-            ResultSet rs = null;
-            System.out.println("reached here-----------------------------------");
             try {
                 // Registering Postgresql JDBC driver with the DriverManager
                 Class.forName("org.postgresql.Driver");
@@ -30,9 +28,6 @@
             
             <%-- -------- Sign Up Form Code ------------ --%>
    <%
-                String action = request.getParameter("action");
-                // Check if an insertion is requested
-                if (action != null && action.equals("insert")) {
 
                     // Begin transaction
                     conn.setAutoCommit(false);
@@ -40,9 +35,9 @@
                     // Create the prepared statement and use it to
                     // INSERT student values INTO the students table.
                     pstmt = conn
-                    .prepareStatement("INSERT INTO students (name, role, age, state) VALUES (?, ?, ?, ?)");
+                    .prepareStatement("INSERT INTO users (name, role, age, state) VALUES (?, ?, ?, ?)");
 
-                    pstmt.setString(1, request.getParameter("name"));
+                    pstmt.setString(1, request.getParameter("username"));
                     pstmt.setString(2, request.getParameter("role"));
                     pstmt.setString(3, request.getParameter("age"));
                     pstmt.setString(4, request.getParameter("state"));
@@ -51,13 +46,11 @@
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
-                }
+                
             %>
 
             <%-- -------- Close Connection Code -------- --%>
             <%
-                // Close the ResultSet
-                rs.close();
 
                 // Close the Connection
                 conn.close();
@@ -70,13 +63,7 @@
             finally {
                 // Release resources in a finally block in reverse-order of
                 // their creation
-
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (SQLException e) { } // Ignore
-                    rs = null;
-                }
+                
                 if (pstmt != null) {
                     try {
                         pstmt.close();
