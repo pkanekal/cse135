@@ -15,9 +15,18 @@
 		<servlet-name>signup</servlet-name>
 		<jsp-file>/signup/signup.jsp</jsp-file>
 	</servlet>
+	<servlet>
+	<servlet-name>loginservlet</servlet-name>
+	<jsp-file>/LogForm.jsp</jsp-file>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>signup</servlet-name>
 		<url-pattern>/signup</url-pattern>
+	</servlet-mapping>
+		<servlet-mapping>
+		<servlet-name>loginservlet</servlet-name>
+		<url-pattern>/loginservlet</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>
