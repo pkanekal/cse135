@@ -22,8 +22,8 @@
 
                 // Open a connection to the database using DriverManager
                 conn = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost/cse135?" +
-                    "user=postgres&password=postgres");
+                		"jdbc:postgresql://localhost/cse135?" +
+                		"user=postgres&password=postgres");
             %>
             
             <%-- -------- Sign Up Form Code ------------ --%>
@@ -46,7 +46,9 @@
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
-                
+                   
+                    if (request.getParameter("username") != null)
+                    out.println("You have created an account," + request.getParameter("username") );
             %>
 
             <%-- -------- Close Connection Code -------- --%>

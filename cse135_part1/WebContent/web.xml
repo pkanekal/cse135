@@ -28,10 +28,6 @@
 		<servlet-name>signup</servlet-name>
 		<url-pattern>/signup</url-pattern>
 	</servlet-mapping>
-		<servlet-mapping>
-		<servlet-name>LoginServlet</servlet-name>
-		<url-pattern>../Java Resources/src/cse135/LoginServlet.java</url-pattern>
-	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>Products</servlet-name>
 		<url-pattern>/Products</url-pattern>
