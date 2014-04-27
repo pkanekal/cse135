@@ -16,7 +16,7 @@
 		<jsp-file>/signup/signup.jsp</jsp-file>
 	</servlet>
 	<servlet>
- 	<servlet-name>loginservlet</servlet-name>
+ 	<servlet-name>LoginServlet</servlet-name>
  	<jsp-file>/LogForm.jsp</jsp-file>
  	</servlet>
 	<servlet-mapping>
@@ -24,7 +24,7 @@
 		<url-pattern>/signup</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
-		<servlet-name>loginservlet</servlet-name>
+		<servlet-name>LoginServlet</servlet-name>
 		<url-pattern>LoginServlet.java</url-pattern>
 	</servlet-mapping>
 

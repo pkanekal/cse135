@@ -34,6 +34,7 @@
 
                     // Begin transaction
                     conn.setAutoCommit(false);
+                   
 
                     // Create the prepared statement and use it to
                     // INSERT student values INTO the students table.
