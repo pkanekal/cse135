@@ -16,8 +16,6 @@
             
             Connection conn = null;
             PreparedStatement pstmt = null;
-            ResultSet rs = null;
-            System.out.println("reached here-----------------------------------");
             try {
                 // Registering Postgresql JDBC driver with the DriverManager
                 Class.forName("org.postgresql.Driver");
@@ -30,6 +28,7 @@
             
             <%-- -------- Sign Up Form Code ------------ --%>
    <%
+
                     // Begin transaction
                     conn.setAutoCommit(false);
 
@@ -67,7 +66,6 @@
                 // Release resources in a finally block in reverse-order of
                 // their creation
 
-               
                 if (pstmt != null) {
                     try {
                         pstmt.close();
