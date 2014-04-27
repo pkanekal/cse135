@@ -8,6 +8,7 @@
         </td>
         <td>
             <%-- Import the java.sql package --%>
+            <%@ page import="java.util.ArrayList"%>
             <%@ page import="java.sql.*"%>
             <%-- -------- Open Connection Code -------- --%>
             <%
@@ -15,6 +16,8 @@
             Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;
+            ResultSet r = null;
+            ArrayList<Integer> a = new ArrayList<Integer>();
             
             try {
                 // Registering Postgresql JDBC driver with the DriverManager
@@ -31,8 +34,16 @@
                 String action = request.getParameter("action");
                 // Check if an insertion is requested
                 if (action != null && action.equals("insert")) {
-
+                	Statement stmt = conn.createStatement();
+                    rs = stmt.executeQuery("SELECT * FROM categories WHERE \"name\" = '" + request.getParameter("name")+"'");
                     // Begin transaction
+                    
+                    if (rs.next()) {
+						out.println("Failure to insert new category: duplicate name");
+						rs = null;
+					}
+                    else
+                    {
                     conn.setAutoCommit(false);
                    
 
@@ -52,6 +63,9 @@
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
+                    if (request.getParameter("name") != null)
+                    	out.println("Category has been added: " + request.getParameter("name"));
+                }
                 }
             %>
             
@@ -86,9 +100,31 @@
                 // Check if a delete is requested
                 if (action != null && action.equals("delete")) {
 
+                    Statement test = conn.createStatement();
+                    ResultSet delete = null;
+                    ArrayList<Integer> dconc = new ArrayList<Integer>();
+                    
+      
+                    delete = test.executeQuery("SELECT DISTINCT category.id FROM categories AS category, products AS product WHERE category.name = product.category");
+                	while (delete.next()){
+                 	dconc.add(delete.getInt("id"));
+                	}
+                 	
+                     boolean check = false;
+                     for( int i = 0; i < dconc.size(); ++i ){
+                     	if ( rs.getInt("id") == dconc.get(i) ){
+                     	check = true;
+                     	}
+                     }
+                     if ( check ){
+                    	 out.println("Can't delete this category, someone just added a product to it.");
+	
+                     }
+                     else
+                     {
                     // Begin transaction
                     conn.setAutoCommit(false);
-
+   
                     // Create the prepared statement and use it to
                     // DELETE students FROM the Students table.
                     pstmt = conn
@@ -100,6 +136,7 @@
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
+                     }
                 }
             %>
 
@@ -112,6 +149,7 @@
                 // the student attributes FROM the Student table.
                 rs = statement.executeQuery("SELECT * FROM categories");
             %>
+            
             
             <!-- Add an HTML table header row to format the results -->
             <table border="1">
@@ -160,12 +198,31 @@
                 <%-- Button --%>
                 <td><input type="submit" value="Update"></td>
                 </form>
-                <form action="categories.jsp" method="POST">
-                    <input type="hidden" name="action" value="delete"/>
-                    <input type="hidden" value="<%=rs.getInt("id")%>" name="id"/>
-                    <%-- Button --%>
-                <td><input type="submit" value="Delete"/></td>
-                </form>
+                
+      <% 
+                Statement state = conn.createStatement();
+                ResultSet d = null;
+  
+                d = state.executeQuery("SELECT DISTINCT category.id FROM categories AS category, products AS product WHERE category.name = product.category");
+            	while (d.next()){
+             	a.add(d.getInt("id"));
+            	}
+             	
+                 boolean check = false;
+                 for( int i = 0; i < a.size(); ++i ){
+                 	if ( rs.getInt("id") == a.get(i) ){
+                 	check = true;
+                 	}
+                 }
+                 if ( !check ){
+                	 %>
+                     <form action="categories.jsp" method="POST">
+                         <input type="hidden" name="action" value="delete"/>
+                         <input type="hidden" value="<%=rs.getInt("id")%>" name="id"/>
+                         <%-- Button --%>
+                     <td><input type="submit" value="Delete"/></td>
+                     </form>
+                    <%} %>       	  
             </tr>
 
             <%
