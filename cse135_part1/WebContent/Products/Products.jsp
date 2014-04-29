@@ -1,32 +1,69 @@
 <html>
 
 <body>
-<h2>Attempt 3</h2>
-<table>
+<h2>Products</h2>
+            <%-- Import the java.sql package --%>
+            <%@ page import="java.sql.*"%>
+            
+<div style="float:left">
+ <%
+	Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null; 
+    try {
+        /* -------- Open Connection Code -------- */
+        
+        // Registering Postgresql JDBC driver with the DriverManager
+        Class.forName("org.postgresql.Driver");
+
+        // Open a connection to the database using DriverManager
+        conn = DriverManager.getConnection(
+            "jdbc:postgresql://localhost/cse135?" +
+            "user=postgres&password=postgres");
+       	%>
+        <p>Search bar:
+        	<form action="/cse135_part1/Products/Products.jsp" method="POST" id="search">
+        	<input type="hidden" name="filter2" id="filter2" value="<%=request.getParameter("filter") %>"/>
+        	<input type="text" name="searchText" value="">
+        	<input type="submit" value="search">
+        	</form>
+       	</p>
+		<%       	
+        // populate list of links with categories
+        Statement stmt = conn.createStatement();
+             			ResultSet res = stmt.executeQuery("SELECT * FROM categories");
+        %> 
+        <form action="/cse135_part1/Products/Products.jsp" method="POST" id="categoryFilter">
+        	<input type="hidden" name="filter" id="filter" value=""/>
+        	<input type="hidden" name="search2" id="search2" value="<%=request.getParameter("searchText") %>"/>
+        	
+            <input type="hidden" value="" name="all" size="10"/>
+        		<a href="javascript:{}" 
+        		onclick="document.getElementById('filter').value='all'; 
+        		document.getElementById('categoryFilter').submit(); return false;">
+        		All Products</a><br>
+		<%
+  		while (res.next()) {
+        	res.getString("name");             			
+		%>
+		<input type="hidden" name="<%= res.getString("name") %>">
+		<a href="javascript:{}" 
+		onclick="document.getElementById('filter').value='<%=res.getString("name") %>';
+		document.getElementById('categoryFilter').submit(); return false;">
+		<%= res.getString("name") %></a><br>
+		<% } %>
+		</form>
+</div>
+
+<table style="float:right">
     <tr>
         <%--- <td valign="top">
             <%-- -------- Include menu HTML code -------- --%>
            <%-- <jsp:include page="/menu.html" />  
         </td>--%>
         <td>
-            <%-- Import the java.sql package --%>
-            <%@ page import="java.sql.*"%>
-            <%-- -------- Open Connection Code -------- --%>
-            <%
-            
-            Connection conn = null;
-            PreparedStatement pstmt = null;
-            ResultSet rs = null;
-            
-            try {
-                // Registering Postgresql JDBC driver with the DriverManager
-                Class.forName("org.postgresql.Driver");
 
-                // Open a connection to the database using DriverManager
-                conn = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost/cse135?" +
-                    "user=postgres&password=postgres");
-            %>
+
             
             <%-- -------- INSERT Code -------- --%>
             <%
@@ -35,20 +72,21 @@
 
                 if (action != null && action.equals("insert")) {
                 	// Check if sku already exists in table
-                	System.err.println("------------------initial---------------------");
-                	 
-                	Statement stmt = conn.createStatement();
+                	double price;
+                	// stmt = conn.createStatement();
+                	// rs = stmt.executeQuery("SELECT * FROM products WHERE \"category\"= '" + request.getParameter("category")+"'");
+                	// boolean categoryExists = rs.next();
+
+                	stmt = conn.createStatement();
                     rs = stmt.executeQuery("SELECT * FROM products WHERE \"sku\" = '" + request.getParameter("sku")+"'");
-                     
-            
-                	System.err.println("------------------point1---------------------");
-
-                	System.err.println("------------------point2---------------------");
-
-                	System.err.println("------------------point3---------------------");
-
-					if (Double.parseDouble(request.getParameter("price")) < 0 
-						|| rs.next()) {
+          			try {
+          				price = Double.parseDouble(request.getParameter("price"));
+          			}
+          			catch (NumberFormatException e) {
+          				price = -1;
+          			}
+					if (price < 0 || rs.next() || request.getParameter("productName") == ""
+						/* || !categoryExists*/) {
 						out.println("Failure to insert new product.");
 						rs = null;
 					}
@@ -80,7 +118,29 @@
             <%
                 // Check if an update is requested
                 if (action != null && action.equals("update")) {
+                	// Check if sku already exists in table
+               	    double price;
+               	 	//stmt = conn.createStatement();
+             		//rs = stmt.executeQuery("SELECT * FROM products WHERE \"category\"= '" + request.getParameter("category")+"'");
+             		//boolean categoryExists = rs.next();
+                	stmt = conn.createStatement();
+                    rs = stmt.executeQuery("SELECT * FROM products WHERE \"sku\" = '" + request.getParameter("sku")+"'"
+                    		+ " AND \"id\" != '" + request.getParameter("id") +"'");
+          			try {
+          				price = Double.parseDouble(request.getParameter("price"));
+          			}
+          			catch (NumberFormatException e) {
+          				price = -1.0;
+          			}
+          			boolean uniqueSKU = rs.next();
 
+					if ( price < 0 || uniqueSKU /*|| !categoryExists*/
+						|| request.getParameter("productName") == ""
+						) {
+						out.println("Failure to insert new product.");
+						rs = null;
+					}
+					else {
                     // Begin transaction
                     conn.setAutoCommit(false);
 
@@ -100,6 +160,7 @@
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
+					}
                 }
             %>
             
@@ -132,7 +193,23 @@
 
                 // Use the created statement to SELECT
                 // the student attributes FROM the Student table.
-                rs = statement.executeQuery("SELECT * FROM products");
+                String filter = request.getParameter("filter");
+                String filter2 = request.getParameter("filter2");
+				String search = request.getParameter("searchText");
+				String search2 = request.getParameter("search2");
+
+				if (filter == null && filter2 != null && !filter2.equals("null")) 
+					filter = filter2;
+				
+				if (search == null && search2 != null && !search2.equals("null"))
+					search = search2;
+					
+                if (filter == null || filter.equals("") || filter.equals("all")) {
+                	rs = statement.executeQuery("SELECT * FROM products");
+                }
+                else {
+                    rs = statement.executeQuery("SELECT * FROM products WHERE \"category\" ='"+filter+"'");
+                }
             %>
             
             <!-- Add an HTML table header row to format the results -->
@@ -149,7 +226,19 @@
                     <input type="hidden" name="action" value="insert"/>
                     <th><input value="" name="productName" size="10"/></th>
                     <th><input value="" name="sku" size="15"/></th>
-                    <th><input value="" name="category" size="15"/></th>
+                    <th>
+                    <select name="category">
+                    <%  
+                    	stmt = null;
+                    	res = null;
+                    	stmt = conn.createStatement();
+             			ResultSet r = stmt.executeQuery("SELECT * FROM categories");
+             			while (r.next()) {
+             		%>
+                    	<option> <%=r.getString("name")%></option>
+                    <% } %>
+                    </select>
+                    </th>
                     <th><input value="" name="price" size="15"/></th>
                     <th><input type="submit" value="Insert"/></th>
                 </form>
@@ -159,6 +248,8 @@
             <%
                 // Iterate over the ResultSet
                 while (rs.next()) {
+                	if (search == null || search.equals("") ||
+                		rs.getString("productName").contains(search)) {
             %>
 
             <tr>
@@ -179,7 +270,18 @@
 
                 <%-- Get the category --%>
                 <td>
-                    <input value="<%=rs.getString("category")%>" name="category" size="15"/>
+                
+                    <select name="category">
+                    <%  
+                    	stmt = conn.createStatement();
+             			res = stmt.executeQuery("SELECT * FROM categories");
+             			while (res.next()) {
+             		%>
+                    	<option <% 
+                    		if (rs.getString("category").equals(res.getString("name"))) { %>selected<% } %>>
+                    	<%=res.getString("name") %></option>
+                    <% } %>
+                    </select>
                 </td>
 
                 <%-- Get the price --%>
@@ -200,7 +302,7 @@
 
             <%
                 }
-
+                }
             %>
         
             <%-- -------- Close Connection Code -------- --%>
