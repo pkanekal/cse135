@@ -7,29 +7,95 @@
 <title>Insert title here</title>
 </head>
 <body>
-      <h1>Login Page</h1>  
-        <form name="login" action="LoginValidate">  
-        <%  
-            if (request.getParameter("error")!=null) {  
-        %>  
-            Login failed. Please try again.  
-        <%  
-            }  
-        %>  
-            <table border="0" width="300" cellspacing="5">  
-                <tr>  
-                    <td>Username:</td>  
-                    <td><input type="text" name="userName" value="" width="16" size="16" maxlength="16"/></td>  
-                </tr>  
-                <tr>  
-                    <td>Password:</td>  
-                    <td><input type="password" name="passWord" value="" width="16" size="16" maxlength="16"/></td>  
-                </tr>  
-                <tr>  
-                    <td> </td>  
-                    <td><input type="submit" value="Login" name="login" /><input type="submit" value="Cancel" name="cancel" /></td>  
-                </tr>  
-            </table>  
-        </form>  
+<table>
+        <td valign="top">
+            <%-- -------- Include menu HTML code -------- --%>
+        </td>
+    <tr>
+            <%-- Import the java.sql package --%>
+            <%@ page import="java.sql.*"%>
+     <td>
+	<form action="login.jsp" method="post">
+		<label>Name: <input type="text" name="name" value="" /></label>
+		<br />
+		<input type="hidden" name="loggedin" value="yes" />
+		<input type="submit" value="Login" />
+	</form>
+            <%
+            
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            ResultSet rs = null;
+            
+            try {
+                // Registering Postgresql JDBC driver with the DriverManager
+                Class.forName("org.postgresql.Driver");
+
+                // Open a connection to the database using DriverManager
+                conn = DriverManager.getConnection(
+                    "jdbc:postgresql://localhost/cse135?" +
+                    "user=postgres&password=postgres");
+            %>
+            <%-- -------- INSERT Code -------- --%>
+     <%
+        String action = request.getParameter("loggedin");
+        // Check if an insertion is requested
+        if (action != null && action.equals("yes")) {
+        	//System.out.println("In Sign up");
+            // Begin transaction
+            conn.setAutoCommit(false);
+
+            // Create the prepared statement and use it to
+            // INSERT student values INTO the students table.
+            pstmt = conn
+            .prepareStatement("SELECT name FROM users WHERE name='" + request.getParameter("name") + "'");
+            rs = pstmt.executeQuery();
+            
+            
+            if ( !rs.next() ){
+            	out.println("Sorry, " + request.getParameter("name") + " is not registered. Please sign up.");
+            }
+            else{
+            	String name = rs.getString("name");
+            	out.println("Hello " + name);
+            	session.setAttribute("user", name);
+            }
+            
+            // Commit transaction
+            conn.commit();
+            conn.setAutoCommit(true);
+    %>
+            <%-- -------- Close Connection Code -------- --%>
+            <%
+
+                // Close the Connection
+                conn.close(); }
+            } catch (SQLException e) {
+
+                // Wrap the SQL exception in a runtime exception to propagate
+                // it upwards
+                throw new RuntimeException(e);
+            }
+            finally {
+                // Release resources in a finally block in reverse-order of
+                // their creation
+
+                if (pstmt != null) {
+                    try {
+                        pstmt.close();
+                    } catch (SQLException e) { } // Ignore
+                    pstmt = null;
+                }
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) { } // Ignore
+                    conn = null;
+                }
+            }
+            %>
+          </table>
+        </td>
+    </tr>
 </body>
 </html>

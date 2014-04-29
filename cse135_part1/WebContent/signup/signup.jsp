@@ -60,7 +60,7 @@
 
                 // Wrap the SQL exception in a runtime exception to propagate
                 // it upwards
-                throw new RuntimeException(e);
+                //throw new RuntimeException(e);
             }
             finally {
                 // Release resources in a finally block in reverse-order of
