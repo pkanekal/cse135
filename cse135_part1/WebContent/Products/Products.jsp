@@ -35,6 +35,8 @@
         %> 
         <form action="/cse135_part1/Products/Products.jsp" method="POST" id="categoryFilter">
         	<input type="hidden" name="filter" id="filter" value=""/>
+        	<input type="hidden" name="search2" id="search2" value="<%=request.getParameter("searchText") %>"/>
+        	
             <input type="hidden" value="" name="all" size="10"/>
         		<a href="javascript:{}" 
         		onclick="document.getElementById('filter').value='all'; 
@@ -194,10 +196,14 @@
                 String filter = request.getParameter("filter");
                 String filter2 = request.getParameter("filter2");
 				String search = request.getParameter("searchText");
-				
+				String search2 = request.getParameter("search2");
+
 				if (filter == null && filter2 != null && !filter2.equals("null")) 
 					filter = filter2;
 				
+				if (search == null && search2 != null && !search2.equals("null"))
+					search = search2;
+					
                 if (filter == null || filter.equals("") || filter.equals("all")) {
                 	rs = statement.executeQuery("SELECT * FROM products");
                 }
