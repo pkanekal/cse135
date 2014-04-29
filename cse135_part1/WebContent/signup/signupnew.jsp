@@ -1,11 +1,5 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
-<!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title> Sign up</title>
-</head>
+
 <body>
 <h2>Sign Up</h2>
 <table>
@@ -20,10 +14,10 @@
             <%-- -------- Open Connection Code -------- --%>
             <%
             
+            int count = 0;
             Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;
-
             try {
                 // Registering Postgresql JDBC driver with the DriverManager
                 Class.forName("org.postgresql.Driver");
@@ -32,23 +26,37 @@
                 conn = DriverManager.getConnection(
                 		"jdbc:postgresql://localhost/postgres?" +
                 		"user=postgres&password=postgres");
+                Statement st=conn.createStatement();
             %>
             
             <%-- -------- Sign Up Form Code ------------ --%>
    <%
                     // Begin transaction
                     conn.setAutoCommit(false);
+   				
+   					pstmt = conn
+   					.prepareStatement("SELECT name FROM users WHERE name='" + request.getParameter("name") + "'");
+   					//rs=st.executeQuery("select * from users where name='"+request.getParameter("name")+"'");
+   					//rs=st.executeQuery("SELECT name FROM users GROUP BY name HAVING COUNT(name) > 0");
+   					//rs=st.executeQuery("SELECT * FROM users WHERE \"name\" = '" + request.getParameter("name)")+"'");
+					rs = pstmt.executeQuery();
+   					
+   					if (rs.next()){
+   						out.println("Duplicate");
+   					}
+					else {
+						pstmt = conn
+						.prepareStatement("INSERT INTO users (name, role, age, state) VALUES (?, ?, ?, ?)");
 
+	                    pstmt.setString(1, request.getParameter("name"));
+	                    pstmt.setString(2, request.getParameter("role"));
+	                    pstmt.setString(3, request.getParameter("age"));
+	                    pstmt.setString(4, request.getParameter("state"));
+	                    int rowCount = pstmt.executeUpdate();
+					}
                     // Create the prepared statement and use it to
                     // INSERT student values INTO the students table.
-                    pstmt = conn
-                    .prepareStatement("INSERT INTO users (name, role, age, state) VALUES (?, ?, ?, ?)");
 
-                    pstmt.setString(1, request.getParameter("name"));
-                    pstmt.setString(2, request.getParameter("role"));
-                    pstmt.setString(3, request.getParameter("age"));
-                    pstmt.setString(4, request.getParameter("state"));
-                    int rowCount = pstmt.executeUpdate();
 
                     // Commit transaction
                     conn.commit();

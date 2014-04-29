@@ -8,9 +8,6 @@
 </head>
 <body>
 <table>
-        <td valign="top">
-            <%-- -------- Include menu HTML code -------- --%>
-        </td>
     <tr>
             <%-- Import the java.sql package --%>
             <%@ page import="java.sql.*"%>
@@ -33,7 +30,7 @@
 
                 // Open a connection to the database using DriverManager
                 conn = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost/cse135?" +
+                    "jdbc:postgresql://localhost/postgres?" +
                     "user=postgres&password=postgres");
             %>
             <%-- -------- INSERT Code -------- --%>
@@ -48,7 +45,7 @@
             // Create the prepared statement and use it to
             // INSERT student values INTO the students table.
             pstmt = conn
-            .prepareStatement("SELECT name FROM users WHERE name='" + request.getParameter("name") + "'");
+            .prepareStatement("SELECT name, role FROM users WHERE name='" + request.getParameter("name") + "'");
             rs = pstmt.executeQuery();
             
             
@@ -57,8 +54,10 @@
             }
             else{
             	String name = rs.getString("name");
+            	String role = rs.getString("role");
             	out.println("Hello " + name);
-            	session.setAttribute("user", name);
+            	session.setAttribute("name", name);
+            	session.setAttribute("role", role);
             }
             
             // Commit transaction
