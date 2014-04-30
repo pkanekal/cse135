@@ -12,7 +12,12 @@
     ResultSet rs = null; 
     try {
         /* -------- Open Connection Code -------- */
-        
+      	if (session.getAttribute("role").equals("customer"))
+          	{
+          		out.println("Sorry! You don't have the permissions to view this page.");
+          	}
+          	if (session.getAttribute("role").equals("owner"))
+          	{
         // Registering Postgresql JDBC driver with the DriverManager
         Class.forName("org.postgresql.Driver");
 
@@ -315,6 +320,7 @@
 
                 // Close the Connection
                 conn.close();
+          	}
             } catch (SQLException e) {
 
                 // Wrap the SQL exception in a runtime exception to propagate
