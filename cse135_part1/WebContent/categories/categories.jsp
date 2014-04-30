@@ -39,7 +39,10 @@
             <%
                 String action = request.getParameter("action");
                 // Check if an insertion is requested
-                if (action != null && action.equals("insert")) {
+                if (action != null && action.equals("insert")){ 
+                String action2 = (String)session.getAttribute("role");
+            // Check if an insertion is requested
+            if (action2.equals("owner")) {
                 	Statement stmt = conn.createStatement();
                     rs = stmt.executeQuery("SELECT * FROM categories WHERE \"name\" = '" + request.getParameter("name")+"'");
                     // Begin transaction
@@ -71,6 +74,7 @@
                     conn.setAutoCommit(true);
                     if (request.getParameter("name") != null)
                     	out.println("Category has been added: " + request.getParameter("name"));
+                }
                 }
                 }
             %>

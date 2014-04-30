@@ -62,6 +62,7 @@
             	session.setAttribute("age", age);
             	session.setAttribute("state", state);
             	loggedin = 2;
+            	out.println(role);
             }
             
             // Commit transaction
@@ -116,7 +117,9 @@
     if (loggedin == 2){
     	out.println("Hello " + request.getParameter("name")); 
     	//<input name="signedup" type="hidden" value="yes"/>; 
-    	session.setAttribute("name", request.getParameter("name"));
+    	//session.setAttribute("name", request.getParameter("name"));
+    	//session.setAttribute("role", request.getParameter("role"));
+    	
     }
     %>
     <form action="../categories/categories.jsp">

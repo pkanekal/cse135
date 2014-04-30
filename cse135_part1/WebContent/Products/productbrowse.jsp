@@ -106,9 +106,9 @@
 
             <%-- -------- Iteration Code -------- --%>
             <%
-            String action = (String)session.getAttribute("name");
+            String action = (String)session.getAttribute("role");
             // Check if an insertion is requested
-            if (action != null) {
+            if (action.equals("customer")) {
                 // Iterate over the ResultSet
                 while (rs.next()) {
                 	if (search == null || search.equals("") ||
