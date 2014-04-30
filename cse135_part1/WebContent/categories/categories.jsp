@@ -1,6 +1,12 @@
 <html>
 
 <body>
+<% 
+//String action2 = request.getParameter("registered");
+//if (action2 != null && action2.equals("yes")){
+	//	out.println("Hello" + session.getAttribute("name"));
+		//}
+%>		
 <table>
     <tr>
         <td valign="top">

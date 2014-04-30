@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>Login</title>
 </head>
 <body>
 <table>
@@ -15,7 +15,7 @@
 	<form action="login.jsp" method="post">
 		<label>Name: <input type="text" name="name" value="" /></label>
 		<br />
-		<input type="hidden" name="loggedin" value="yes" />
+		<input type="hidden" name="registered" value="yes" />
 		<input type="submit" value="Login" />
 	</form>
             <%
@@ -23,19 +23,19 @@
             Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;
-            
+            int loggedin = 0;
             try {
                 // Registering Postgresql JDBC driver with the DriverManager
                 Class.forName("org.postgresql.Driver");
 
                 // Open a connection to the database using DriverManager
                 conn = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost/postgres?" +
+                    "jdbc:postgresql://localhost/cse135?" +
                     "user=postgres&password=postgres");
             %>
             <%-- -------- INSERT Code -------- --%>
      <%
-        String action = request.getParameter("loggedin");
+        String action = request.getParameter("registered");
         // Check if an insertion is requested
         if (action != null && action.equals("yes")) {
         	//System.out.println("In Sign up");
@@ -45,19 +45,23 @@
             // Create the prepared statement and use it to
             // INSERT student values INTO the students table.
             pstmt = conn
-            .prepareStatement("SELECT name, role FROM users WHERE name='" + request.getParameter("name") + "'");
+            .prepareStatement("SELECT name, age, state, role FROM users WHERE name='" + request.getParameter("name") + "'");
             rs = pstmt.executeQuery();
             
             
             if ( !rs.next() ){
-            	out.println("Sorry, " + request.getParameter("name") + " is not registered. Please sign up.");
+            	loggedin = 1;
             }
             else{
             	String name = rs.getString("name");
             	String role = rs.getString("role");
-            	out.println("Hello " + name);
+            	String age = rs.getString("age");
+            	String state = rs.getString("state");
             	session.setAttribute("name", name);
             	session.setAttribute("role", role);
+            	session.setAttribute("age", age);
+            	session.setAttribute("state", state);
+            	loggedin = 2;
             }
             
             // Commit transaction
@@ -96,5 +100,34 @@
           </table>
         </td>
     </tr>
+    <a href="../signup/signup.jsp" >Return to registration page.</a>
+    <% 
+    //if ((Boolean)session.getAttribute("role")){
+    //if (request.getParameter("role") == "owner"){
+    	//response.sendRedirect("../categories/categories.jsp");
+    //}
+    %>
+    <% 
+    if (loggedin == 1){
+    	out.println("Sorry, " + request.getParameter("name") + " is not registered. Please sign up.");	
+    }
+    %>
+    <% 
+    if (loggedin == 2){
+    	out.println("Hello " + request.getParameter("name")); 
+    	//<input name="signedup" type="hidden" value="yes"/>; 
+    	session.setAttribute("name", request.getParameter("name"));
+    }
+    %>
+    <form action="../categories/categories.jsp">
+    	<input type="submit" value="Categories">
+    </form>
+        <form action="../Products/Products.jsp">
+    	<input type="submit" value="View Products/Owner">
+    </form>
+            <form action="../Products/productbrowse.jsp">
+    	<input type="submit" value="View Products/Customer">
+    </form>
+    
 </body>
 </html>
