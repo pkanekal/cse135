@@ -47,7 +47,7 @@
             conn.setAutoCommit(false);
             
             Statement stmt= conn.createStatement();
-            result = stmt.executeQuery("SELECT id FROM users WHERE name='"+ session.getAttribute("name") +"'");
+            result = stmt.executeQuery("SELECT id FROM users WHERE \"name\"='"+ session.getAttribute("name") +"'");
             int userID = 0;
             if (result.next())
              userID = result.getInt("id");
@@ -59,13 +59,12 @@
 %>
 <%
 while (result.next()){
-String name = result.getString("name");
-int quantity = Integer.parseInt(result.getString("quantity"));
-PGmoney priceObj = new PGmoney(result.getString("price"));
-double price = priceObj.val;
+	String name = result.getString("productname");
 
-total += quantity * price;
+	int quantity = Integer.parseInt(result.getString("quantity"));
+	double price = Double.parseDouble(result.getString("price"));
 
+	total += quantity * price;
 %>
 <tr>
 <td><%=name%></td>
@@ -100,7 +99,7 @@ Your total is: <%=total%>
     <%-- -------- Error catching ---------- --%>
     <%
      } catch (SQLException e) {
-     out.println("Sorry, something went wrong.");
+         throw new RuntimeException(e);
     }
     finally {
         if (query != null) {

@@ -59,10 +59,9 @@
 %>
 <%
 while (result.next()){
-String name = result.getString("name");
+String name = result.getString("productname");
 int quantity = Integer.parseInt(result.getString("quantity"));
-PGmoney priceObj = new PGmoney(result.getString("price"));
-double price = priceObj.val;
+double price = Double.parseDouble(result.getString("quantity"));
 
 total += quantity * price;
 
