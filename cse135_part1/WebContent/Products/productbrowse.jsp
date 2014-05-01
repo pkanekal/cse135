@@ -4,6 +4,8 @@
 <h2>Products</h2>
             <%-- Import the java.sql package --%>
             <%@ page import="java.sql.*"%>
+            <%-- Include the jsp page that sets the views --%>
+            <jsp:include page="/../userview.jsp" />
             
 <div style="float:left">
  <%

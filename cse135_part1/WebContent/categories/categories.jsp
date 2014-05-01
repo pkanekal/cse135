@@ -16,6 +16,8 @@
             <%-- Import the java.sql package --%>
             <%@ page import="java.util.ArrayList"%>
             <%@ page import="java.sql.*"%>
+            <%-- Include the jsp page that sets the views --%>
+            <jsp:include page="../userview.jsp" />
             <%-- -------- Open Connection Code -------- --%>
             <%
             
