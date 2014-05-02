@@ -6,12 +6,11 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Insert title here</title>
 </head>
-
 <body>
-            <%-- Import the java.sql package --%>
-            <%@ page import="java.sql.*"%>
-     
-            <%
+<%-- Import the java.sql package --%>
+	<%@ page import="java.sql.*"%>
+	
+	    <%
             
             Connection conn = null;
             PreparedStatement pstmt = null;
@@ -26,71 +25,36 @@
                     "jdbc:postgresql://localhost/cse135?" +
                     "user=postgres&password=postgres");
                 // Create the statement
-
+                Statement statement = conn.createStatement();
             %>         
+            
 
-	<%
-        // Create the statement
-        Statement statement = conn.createStatement();
-    %>
-	
-	<h1 align = "center">Product Order Page</h1>
-	<p align = "right"> <a href="shoppingcart.jsp">Buy Cart?</a> <p>
+       	
+        <%=request.getParameter("name") %>
+        <%=request.getParameter("productsku") %>
+        <%=request.getParameter("quantity") %>
+<% 
+        // Create the prepared statement and use it to
+        // INSERT student values INTO the students table.
+        pstmt = conn
+        .prepareStatement("INSERT INTO shoppingcart (customer, product, quantity) VALUES (?,?,?)");
 
-	You have selected <%=request.getParameter("productname")%>.
-	
-	<form method="POST" action="productadd.jsp">
-		<input type="hidden" name="productsku" value="<%=request.getParameter("sku")%>"/>
-		<input type="hidden" name="name" value="<%=session.getAttribute("name")%>"/>
-		
-		How many do you want to add to cart?
-		<input type="number" min="1" value="1" name="quantity"/>
-		
-		<input type="submit" value="Add to Cart"/> 
-	</form>
-	
-	
-	<% rs = statement.executeQuery(
-			"SELECT products.sku, products.category, products.productname, products.price, shoppingcart.quantity " +
-			"FROM products " + "INNER JOIN shoppingcart " +
-			"ON products.sku = shoppingcart.product " +
-			"WHERE shoppingcart.customer = '" + session.getAttribute("name") +"'");		
-	%>
-	
-	<h3>Cart:</h3>
-	
-	<table border="1">
-	
-	<th>Category</th>
-	<th>Product</th>
-	<th>SKU</th>
-	<th>Price</th>
-	<th>Quantity</th>
-	
-	<%	while (rs.next()) { %>
+        pstmt.setString(1, request.getParameter("name"));
+        pstmt.setString(2, request.getParameter("productsku"));
+        pstmt.setInt(3, Integer.parseInt(request.getParameter("quantity")));
+        int rowCount = pstmt.executeUpdate();
 
-	<tr>
-			<td> <%=rs.getString("sku")%> </td>
-			<td> <%=rs.getString("category")%>  </td>
-			<td> <%=rs.getString("productname") %> </td>
-			<td> <%=rs.getString("sku")%> </td>
-			<td> <%=rs.getString("price")%> </td>
-			<td> <%=rs.getString("quantity")%> </td>
-
-	</tr>
-	
-	<% } %>
-	
-	</table>
-
+        // Commit transaction
+        conn.commit();
+        response.sendRedirect("productbrowse.jsp");
+  	%>
+    
                    <%-- -------- Close Connection Code -------- --%>
             <%
 
+            	statement.close();
                 // Close the Connection
                 conn.close(); 
-            
-
-    
             } catch (SQLException e) {
 
                 // Wrap the SQL exception in a runtime exception to propagate
@@ -115,5 +79,6 @@
                 }
             }
             %>
+
 </body>
 </html>

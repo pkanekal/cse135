@@ -156,10 +156,9 @@
                 </td>
                 
                 <%-- Get the product order link --%>
-				<td>
-					<a href="productorder.jsp"></a>
+				<td> 
+					<a href="productorder.jsp?productname=<%=rs.getString("productname")%>&sku=<%=rs.getString("sku")%>"> >> </a>
 				</td>
-
             </tr>
 
             <%
