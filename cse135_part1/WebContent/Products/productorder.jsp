@@ -34,33 +34,30 @@
         Statement statement = conn.createStatement();
     %>
 	
-	<h1 align = "center">Product Order Page</h1>
-	<p align = "right"> <a href="shoppingcart.jsp">Buy Cart?</a> <p>
+	<h3 align = "center">Product Order</h3>
+	<p align = "left"> <a href="../shoppingcart.jsp">Buy Shopping Cart</a> <p>
 
-	You have selected <%=request.getParameter("productname")%>.
+	Selected <% String displayProduct = request.getParameter("productname"); 
+				out.println(displayProduct); %>.
 	
-	<form method="POST" action="productadd.jsp">
-		<input type="hidden" name="productsku" value="<%=request.getParameter("sku")%>"/>
-		<input type="hidden" name="name" value="<%=session.getAttribute("name")%>"/>
-		
+	<form method="POST" action="productadd.jsp">	
 		How many do you want to add to cart?
-		<input type="number" min="1" value="1" name="quantity"/>
-		
+		<input type="number" min="1" value="1" name="quantity"/>		
 		<input type="submit" value="Add to Cart"/> 
+		<input type="hidden" name="productsku" value="<%=request.getParameter("sku")%>"/>
+		<input type="hidden" name="name" value="<%=session.getAttribute("name")%>"/>	
 	</form>
 	
 	
 	<% rs = statement.executeQuery(
 			"SELECT products.sku, products.category, products.productname, products.price, shoppingcart.quantity " +
-			"FROM products " + "INNER JOIN shoppingcart " +
-			"ON products.sku = shoppingcart.product " +
+			"FROM products " + "INNER JOIN shoppingcart " + "ON products.sku = shoppingcart.product " +
 			"WHERE shoppingcart.customer = '" + session.getAttribute("name") +"'");		
 	%>
 	
 	<h3>Cart:</h3>
 	
 	<table border="1">
-	
 	<th>Category</th>
 	<th>Product</th>
 	<th>SKU</th>
@@ -69,19 +66,25 @@
 	
 	<%	while (rs.next()) { %>
 
-	<tr>
-			<td> <%=rs.getString("sku")%> </td>
-			<td> <%=rs.getString("category")%>  </td>
-			<td> <%=rs.getString("productname") %> </td>
-			<td> <%=rs.getString("sku")%> </td>
-			<td> <%=rs.getString("price")%> </td>
-			<td> <%=rs.getString("quantity")%> </td>
+	<tr align="center">
+			<td> <% String sku1 = rs.getString("sku"); 
+					out.println(sku1);%> </td>
+			<td> <% String category1 = rs.getString("category"); 
+					out.println(category1);%>  </td>
+			<td> <% String pn1 = rs.getString("productname"); 
+					out.println(pn1); %> </td>
+			<td> <% String price1 = rs.getString("price");
+					out.println(price1); %> </td>
+			<td> <% String quant1 = rs.getString("quantity");
+					out.println(quant1); %> </td>
 
 	</tr>
 	
 	<% } %>
 	
 	</table>
+	
+	
 
                    <%-- -------- Close Connection Code -------- --%>
             <%

@@ -30,23 +30,27 @@
             
 
        	
-        <%=request.getParameter("name") %>
-        <%=request.getParameter("productsku") %>
-        <%=request.getParameter("quantity") %>
+
 <% 
+		conn.setAutoCommit(false);
+		String name = request.getParameter("name"); 
+		String productsku = request.getParameter("productsku"); 
+		String quantity = request.getParameter("quantity"); 
         // Create the prepared statement and use it to
         // INSERT student values INTO the students table.
         pstmt = conn
         .prepareStatement("INSERT INTO shoppingcart (customer, product, quantity) VALUES (?,?,?)");
 
-        pstmt.setString(1, request.getParameter("name"));
-        pstmt.setString(2, request.getParameter("productsku"));
-        pstmt.setInt(3, Integer.parseInt(request.getParameter("quantity")));
+        pstmt.setString(1, name);
+        pstmt.setString(2, productsku);
+        pstmt.setInt(3, Integer.parseInt(quantity));
         int rowCount = pstmt.executeUpdate();
 
         // Commit transaction
         conn.commit();
-        response.sendRedirect("productbrowse.jsp");
+        conn.setAutoCommit(true);
+        String redirectURL = "productbrowse.jsp";
+        response.sendRedirect(redirectURL);
   	%>
     
                    <%-- -------- Close Connection Code -------- --%>
