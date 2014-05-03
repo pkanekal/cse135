@@ -119,18 +119,26 @@
     	//<input name="signedup" type="hidden" value="yes"/>; 
     	//session.setAttribute("name", request.getParameter("name"));
     	//session.setAttribute("role", request.getParameter("role"));
-    	
+        if (session.getAttribute("role").equals("customer")) {
+        %>
+        <form action="../Products/productbrowse.jsp">
+        	<input type="submit" value="View Products">
+        </form>
+        <% } %>
+        
+        <% 
+        if (session.getAttribute("role").equals("owner")) {
+        %>
+        <form action="../categories/categories.jsp">
+        	<input type="submit" value="Categories">
+        </form>
+            <form action="../Products/Products.jsp">
+        	<input type="submit" value="View Products">
+        </form>
+    <%  } %> <% 
     }
     %>
-    <form action="../categories/categories.jsp">
-    	<input type="submit" value="Categories">
-    </form>
-        <form action="../Products/Products.jsp">
-    	<input type="submit" value="View Products/Owner">
-    </form>
-            <form action="../Products/productbrowse.jsp">
-    	<input type="submit" value="View Products/Customer">
-    </form>
+
     
 </body>
 </html>
