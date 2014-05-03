@@ -26,7 +26,7 @@ Your Cart:
      
      Connection conn = null;
      PreparedStatement query = null;
-     ResultSet result = null;
+     ResultSet rs = null;
      double total = 0.0;
      int userID = 0;
      int quantity = 0;
@@ -47,20 +47,20 @@ Your Cart:
             conn.setAutoCommit(false);
             
             Statement stmt= conn.createStatement();
-            result = stmt.executeQuery("SELECT id FROM users WHERE name='"+ session.getAttribute("name") +"'");
-            if (result.next())
-             userID = result.getInt("id");
+            rs = stmt.executeQuery("SELECT id FROM users WHERE name='"+ session.getAttribute("name") +"'");
+            if (rs.next())
+             userID = rs.getInt("id");
             
             
-            Statement statement = conn.createStatement();  
-            result = statement.executeQuery("SELECT p.productname, sc.quantity, p.price FROM shoppingcart AS sc, products AS p, users AS u WHERE sc.product = p.sku AND u.id = "+ userID);
+            Statement st = conn.createStatement();  
+            rs = st.executeQuery("SELECT p.productname, s.quantity, p.price FROM shoppingcart AS s, products AS p, users AS u WHERE s.product = p.sku AND u.id = "+ userID);
 
 %>
 <%
-while (result.next()){
-String name = result.getString("productname");
-quantity = Integer.parseInt(result.getString("quantity"));
-price = Double.parseDouble(result.getString("quantity"));
+while (rs.next()){
+String name = rs.getString("productname");
+quantity = Integer.parseInt(rs.getString("quantity"));
+price = Double.parseDouble(rs.getString("price"));
 
 total += quantity * price;
 
@@ -90,10 +90,10 @@ Your total was: <%=total%>
         // Close the Connection
          conn.close();
     %>
-    <%-- -------- Error catching ---------- --%>
+
     <%
      } catch (SQLException e) {
-     out.println("Sorry, something went wrong.");
+     out.println("Error: Unable to confirm");
     }
     finally {
         if (query != null) {
@@ -110,9 +110,5 @@ Your total was: <%=total%>
         }
     }
     %>
-
-
-    
-    
 </body>
 </html>
