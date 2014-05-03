@@ -1,20 +1,17 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+
 <!DOCTYPE html>
 <html>
 <head>
 <%-- Import the java.sql package --%>
 <%@ page import="java.sql.*"%>
 <%@ page import="org.postgresql.util.*" %>
-<!-- Include the UserInfo page -->
 <jsp:include page="userview.jsp" />
 
 <title>Shopping Cart</title>
 </head>
 <body>
-<%--------- Displaying products added ---------%>
 
-<h2>Your Cart: </h2>
+Your Cart:
 <table>
 <tr>
 <th>product </th>
@@ -42,8 +39,6 @@
      %>
     <%-- -------- INSERT Code -------- --%>
     <%
-         //System.out.println("In Sign up");
-            // Begin transaction
             conn.setAutoCommit(false);
             
             Statement stmt= conn.createStatement();
@@ -84,7 +79,7 @@ Your total is: <%=total%>
 <form method="post" action="confirmation.jsp">
 <label>Credit Card<input type="text" name="creditcard" /></label>
 <input type="hidden" name="userID" value="<%= userID %>" />
-<input type="submit" value="Place your Order!" />
+<input type="submit" value="Buy" />
 </form>
 <%
             // Commit transaction

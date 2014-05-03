@@ -1,20 +1,18 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+
 <!DOCTYPE html>
 <html>
 <head>
 <%-- Import the java.sql package --%>
 <%@ page import="java.sql.*"%>
 <%@ page import="org.postgresql.util.*" %>
-<!-- Include the UserInfo page -->
 <jsp:include page="userview.jsp" />
 
-<title>Shopping Cart</title>
+
 </head>
 <body>
 <%--------- Displaying products added ---------%>
-
-<h2>Your Cart: </h2>
+<h3> Shopping Cart</h3>
+Your Cart:
 <table>
 <tr>
 <th>product </th>
@@ -30,6 +28,9 @@
      PreparedStatement query = null;
      ResultSet result = null;
      double total = 0.0;
+     int userID = 0;
+     int quantity = 0;
+     double price = 0.0;
      
      try {
          // Registering Postgresql JDBC driver with the DriverManager
@@ -42,13 +43,11 @@
      %>
     <%-- -------- INSERT Code -------- --%>
     <%
-         //System.out.println("In Sign up");
-            // Begin transaction
+
             conn.setAutoCommit(false);
             
             Statement stmt= conn.createStatement();
             result = stmt.executeQuery("SELECT id FROM users WHERE name='"+ session.getAttribute("name") +"'");
-            int userID = 0;
             if (result.next())
              userID = result.getInt("id");
             
@@ -60,8 +59,8 @@
 <%
 while (result.next()){
 String name = result.getString("productname");
-int quantity = Integer.parseInt(result.getString("quantity"));
-double price = Double.parseDouble(result.getString("quantity"));
+quantity = Integer.parseInt(result.getString("quantity"));
+price = Double.parseDouble(result.getString("quantity"));
 
 total += quantity * price;
 
