@@ -16,7 +16,6 @@
             <%-- Import the java.sql package --%>
             <%@ page import="java.util.ArrayList"%>
             <%@ page import="java.sql.*"%>
-            <%-- Include the jsp page that sets the views --%>
             <jsp:include page="../userview.jsp" />
             <%-- -------- Open Connection Code -------- --%>
             <%
@@ -258,15 +257,17 @@
                 // Close the Connection
                 conn.close();
             	}
-            	else
-            	{
-            	 out.println("you are not logged in");
-            	}
             } catch (SQLException e) {
 
                 // Wrap the SQL exception in a runtime exception to propagate
                 // it upwards
-                throw new RuntimeException(e);
+                out.println("You need to log in");
+                //throw new RuntimeException(e);
+                
+            }
+            catch (Exception e)
+            {
+            	out.println("Error occurred.");
             }
             finally {
                 // Release resources in a finally block in reverse-order of
@@ -299,4 +300,3 @@
 </body>
 
 </html>
-

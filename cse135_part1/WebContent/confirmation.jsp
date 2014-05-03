@@ -11,8 +11,8 @@
 </head>
 <body>
 <%--------- Displaying products added ---------%>
-<h3> Shopping Cart</h3>
-Your Cart:
+Shopping Cart
+Your Cart You Just Bought:
 <table>
 <tr>
 <th>product </th>
@@ -34,6 +34,12 @@ Your Cart:
      
      try {
          // Registering Postgresql JDBC driver with the DriverManager
+         if (session.getAttribute("role").equals("owner"))
+          	{
+          		out.println("Sorry! You don't have the permissions to view this page.");
+          	}
+          	if (session.getAttribute("role").equals("customer"))
+          	{
          Class.forName("org.postgresql.Driver");
 
          // Open a connection to the database using DriverManager
@@ -92,9 +98,13 @@ Your total was: <%=total%>
     %>
 
     <%
-     } catch (SQLException e) {
+          	}} catch (SQLException e) {
      out.println("Error: Unable to confirm");
     }
+     catch (Exception e)
+     {
+     	out.println("Error occurred.");
+     }
     finally {
         if (query != null) {
             try {

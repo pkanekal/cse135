@@ -33,6 +33,12 @@ Contents of your cart:
      
      
      try {
+    	 if (session.getAttribute("role").equals("owner"))
+       	{
+       		out.println("Sorry! You don't have the permissions to view this page.");
+       	}
+       	if (session.getAttribute("role").equals("customer"))
+       	{
          // Registering Postgresql JDBC driver with the DriverManager
          Class.forName("org.postgresql.Driver");
 
@@ -95,9 +101,13 @@ Your total is: <%=total%>
          conn.close();
     %>
     <%
-     } catch (SQLException e) {
+       	}} catch (SQLException e) {
          throw new RuntimeException(e);
     }
+     catch (Exception e)
+     {
+     	out.println("Error occurred.");
+     }
     finally {
         if (query != null) {
             try {

@@ -9,6 +9,7 @@
 <body>
 <%-- Import the java.sql package --%>
 	<%@ page import="java.sql.*"%>
+            <jsp:include page="../userview.jsp" />
 	
 	    <%
             
@@ -17,6 +18,12 @@
             ResultSet rs = null;
             int loggedin = 0;
             try {
+            	if (session.getAttribute("role").equals("owner"))
+              	{
+              		out.println("Sorry! You don't have the permissions to view this page.");
+              	}
+              	if (session.getAttribute("role").equals("customer"))
+              	{
                 // Registering Postgresql JDBC driver with the DriverManager
                 Class.forName("org.postgresql.Driver");
 
@@ -59,11 +66,16 @@
             	statement.close();
                 // Close the Connection
                 conn.close(); 
+              	}
             } catch (SQLException e) {
 
                 // Wrap the SQL exception in a runtime exception to propagate
                 // it upwards
                 throw new RuntimeException(e);
+            }
+            catch (Exception e)
+            {
+            	out.println("Error occurred.");
             }
             finally {
                 // Release resources in a finally block in reverse-order of
