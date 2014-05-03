@@ -11,7 +11,7 @@
 </head>
 <body>
 
-Your Cart:
+Contents of your cart:
 <table>
 <tr>
 <th>product </th>
@@ -25,8 +25,12 @@ Your Cart:
      
      Connection conn = null;
      PreparedStatement query = null;
-     ResultSet result = null;
+     ResultSet rs = null;
      double total = 0.0;
+     int userID = 0;
+     int quantity = 0;
+     double price = 0.0;
+     
      
      try {
          // Registering Postgresql JDBC driver with the DriverManager
@@ -42,22 +46,21 @@ Your Cart:
             conn.setAutoCommit(false);
             
             Statement stmt= conn.createStatement();
-            result = stmt.executeQuery("SELECT id FROM users WHERE \"name\"='"+ session.getAttribute("name") +"'");
-            int userID = 0;
-            if (result.next())
-             userID = result.getInt("id");
+            rs = stmt.executeQuery("SELECT id FROM users WHERE \"name\"='"+ session.getAttribute("name") +"'");
+            if (rs.next())
+             userID = rs.getInt("id");
             
             
-            Statement statement = conn.createStatement();  
-            result = statement.executeQuery("SELECT p.productname, sc.quantity, p.price FROM shoppingcart AS sc, products AS p, users AS u WHERE sc.product = p.sku AND u.id = "+ userID);
+            Statement st = conn.createStatement();  
+            rs = st.executeQuery("SELECT p.productname, s.quantity, p.price FROM shoppingcart AS s, products AS p, users AS u WHERE s.product = p.sku AND u.id = "+ userID);
 
 %>
 <%
-while (result.next()){
-	String name = result.getString("productname");
+while (rs.next()){
+	String name = rs.getString("productname");
 
-	int quantity = Integer.parseInt(result.getString("quantity"));
-	double price = Double.parseDouble(result.getString("price"));
+	quantity = Integer.parseInt(rs.getString("quantity"));
+	price = Double.parseDouble(rs.getString("price"));
 
 	total += quantity * price;
 %>
@@ -77,7 +80,7 @@ while (result.next()){
 Your total is: <%=total%>
 
 <form method="post" action="confirmation.jsp">
-<label>Credit Card<input type="text" name="creditcard" /></label>
+<label>Please provide your credit card.<input type="text" name="creditcard" /></label>
 <input type="hidden" name="userID" value="<%= userID %>" />
 <input type="submit" value="Buy" />
 </form>
@@ -91,7 +94,6 @@ Your total is: <%=total%>
         // Close the Connection
          conn.close();
     %>
-    <%-- -------- Error catching ---------- --%>
     <%
      } catch (SQLException e) {
          throw new RuntimeException(e);

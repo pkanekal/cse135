@@ -258,10 +258,10 @@
                 // Close the Connection
                 conn.close();
             	}
-            	//else
-            	//{
-            	//	out.println("Sorry, only owners.");
-            	//}
+            	else
+            	{
+            	 out.println("you are not logged in");
+            	}
             } catch (SQLException e) {
 
                 // Wrap the SQL exception in a runtime exception to propagate
