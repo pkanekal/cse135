@@ -119,27 +119,7 @@
                 if (action != null && action.equals("delete")) {
 
                     Statement test = conn.createStatement();
-                    ResultSet delete = null;
-                    ArrayList<Integer> dconc = new ArrayList<Integer>();
-                    
-      
-                    delete = test.executeQuery("SELECT DISTINCT category.id FROM categories AS category, products AS product WHERE category.name = product.category");
-                	while (delete.next()){
-                 	dconc.add(delete.getInt("id"));
-                	}
-                 	System.err.println("size is: " + dconc.size());
-                     boolean check = false;
-                     for( int i = 0; i < dconc.size(); ++i ){
-                     	if ( rs.getInt("id") == dconc.get(i) ){
-                     	check = true;
-                     	}
-                     }
-                     if ( check ){
-                    	 out.println("Can't delete this category, someone just added a product to it.");
-	
-                     }
-                     else
-                     {
+                  
                     // Begin transaction
                     conn.setAutoCommit(false);
    
@@ -155,7 +135,6 @@
                     conn.commit();
                     conn.setAutoCommit(true);
                      }
-                }
             %>
 
             <%-- -------- SELECT Statement Code -------- --%>
