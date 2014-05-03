@@ -19,7 +19,7 @@ else if (session.getAttribute("role").equals("customer")) {
 %>
 	<h2> Hello, <%out.println(session.getAttribute("name"));%></h2>
 	<a href="/cse135_part1/Products/productbrowse.jsp">Browse Products</a>
-	<a href="/cse135_part1/shoppingcart.jsp">Shopping Cart</a>
+	<a href="/cse135_part1/shoppingcart.jsp">Buy Shopping Cart</a>
 
 <%
     }
