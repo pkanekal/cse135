@@ -126,7 +126,7 @@
                 	while (delete.next()){
                  	dconc.add(delete.getInt("id"));
                 	}
-                 	
+                 	System.err.println("size is: " + dconc.size());
                      boolean check = false;
                      for( int i = 0; i < dconc.size(); ++i ){
                      	if ( rs.getInt("id") == dconc.get(i) ){

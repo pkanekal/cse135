@@ -78,7 +78,8 @@ total += quantity * price;
 </tr>
 <%	
 }
-
+Statement newStmt= conn.createStatement();
+newStmt.executeUpdate("DELETE FROM shoppingcart WHERE \"customer\" = '" + session.getAttribute("name")+ "'");
 %>
 
 </table>
@@ -87,6 +88,7 @@ total += quantity * price;
 Your total was: <%=total%>
 
 <%
+			
             // Commit transaction
             conn.commit();
             conn.setAutoCommit(true);

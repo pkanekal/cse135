@@ -121,10 +121,22 @@
                     //rs = stmt.executeQuery("SELECT * FROM users WHERE \"name\" = '" + request.getParameter("name")+"'");
    					rs = stmt.executeQuery("SELECT name FROM users WHERE name='" + request.getParameter("name") + "'");
    					//rs=stmt.executeQuery("select * from users where name='"+request.getParameter("name")+"'");
-   					
+   					boolean invalidAge = false;
+   					try {
+   						int x = Integer.parseInt(request.getParameter("age"));
+   						if (x < 0) {
+   							throw new NumberFormatException();
+   						}
+   					}
+   					catch (NumberFormatException e) {
+   						invalidAge = true;
+   					}
    					if (rs.next()){
    						out.println("Sorry, this name has been registered.");
    						//rs = null;
+   					}
+   					else if (invalidAge) {
+   						out.println("Sorry, You have entered an invalid age.");
    					}
 					else {
 						
