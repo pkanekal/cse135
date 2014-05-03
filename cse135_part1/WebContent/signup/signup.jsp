@@ -123,7 +123,10 @@
    					//rs=stmt.executeQuery("select * from users where name='"+request.getParameter("name")+"'");
    					boolean invalidAge = false;
    					try {
-   						Integer.parseInt(request.getParameter("age"));
+   						int x = Integer.parseInt(request.getParameter("age"));
+   						if (x < 0) {
+   							throw new NumberFormatException();
+   						}
    					}
    					catch (NumberFormatException e) {
    						invalidAge = true;
