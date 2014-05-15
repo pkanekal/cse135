@@ -21,7 +21,6 @@
           	{
         // Registering Postgresql JDBC driver with the DriverManager
         Class.forName("org.postgresql.Driver");
-
         // Open a connection to the database using DriverManager
         conn = DriverManager.getConnection(
             "jdbc:postgresql://localhost/cse135?" +
@@ -210,11 +209,14 @@
 				if (search == null && search2 != null && !search2.equals("null"))
 					search = search2;
 					
-                if (filter == null || filter.equals("") || filter.equals("all")) {
+				session.setAttribute("filter", filter);
+
+				if (filter == null || filter.equals("") || filter.equals("all")
+                	|| session.getAttribute("filter").equals("all")) {
                 	rs = statement.executeQuery("SELECT * FROM products");
                 }
                 else {
-                    rs = statement.executeQuery("SELECT * FROM products WHERE \"category\" ='"+filter+"'");
+                    rs = statement.executeQuery("SELECT * FROM products WHERE \"category\" ='"+session.getAttribute("filter")+"'");
                 }
             %>
             
