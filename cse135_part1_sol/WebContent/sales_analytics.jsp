@@ -203,6 +203,56 @@
 			%>	
 				<th><%=p_name %><br>($<%=totalSalesPerProduct %>)</th> 
 			<% }  %>
+		
+			   <% 
+			   String rowDD = request.getParameter("rowDD"); 
+			   String stateSelection = request.getParameter("state");
+			   String query1 = "";
+			   String information ="";
+			   boolean customerRow = true;
+			   ResultSet users = stmt.executeQuery("SELECT * FROM users order by id asc;");
+			   String u_name = "";
+			   String u_id = "";
+			   String u_state = "";
+			   while (users.next()){
+				   if (rowDD.equals("States") && rowDD != null)
+				   { customerRow = false; }
+				   
+				   if (rowDD.equals("States") && !customerRow){
+					   query1 = "SELECT state FROM users ORDER BY state asc";
+					   u_state = users.getString(5);
+				   }
+				   else{
+					   if (stateSelection.equals("all") && customerRow){
+						   query1 = "SELECT id, name FROM users ORDER BY name asc";
+						   u_id= users.getString(1);
+						   u_name = users.getString(2);		 
+					   }
+					   else{
+					   query1 = "SELECT id, name FROM users WHERE state = '"+ stateSelection +"' ORDER BY name asc";
+					   u_id = users.getString(1);
+					   u_name = users.getString(2);
+				   	   }
+				   }
+				   ResultSet customerState = stmt.executeQuery(query1.toString());
+				   while (customerState.next()){
+					   information = customerState.getString(1);
+				   }
+				   customerState = null; 
+			   
+			   %>
+			   <% if (customerRow){ %>
+			   <th><%=u_id %></th><th><%=u_name %><br>($<%=information %>)</th> 
+			   <% } %> 
+			   <% if (!customerRow){ %>
+			   <th><%=u_state %><br>($<%=information %>)</th> 
+			   <% } %>
+			   <% } %>
+			   <% 
+			   //per product/each user
+			   //SELECT u.name, p.name, (c.quantity * c.price) as ProductSpentPer FROM users u, carts c, products p WHERE c.uid = u.id AND p.id = c.pid
+			%>
+			
 			
 		</tr>
 	</table>
