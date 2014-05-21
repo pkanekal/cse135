@@ -187,7 +187,6 @@
 						}
 						
 					}
-
 					System.err.println(query.toString());
 					System.err.println("----------------------------");
 					salesPerProduct = stmt2.executeQuery(query.toString());
@@ -202,6 +201,7 @@
 					}
 			%>	
 				<th><%=p_name %><br>($<%=totalSalesPerProduct %>)</th> 
+				
 			<% }  %>
 		
 			   <% 
@@ -209,11 +209,14 @@
 			   String stateSelection = request.getParameter("state");
 			   String query1 = "";
 			   String information ="";
+			   
+			   Statement stmt3 = conn.createStatement();
 			   boolean customerRow = true;
-			   ResultSet users = stmt.executeQuery("SELECT * FROM users order by id asc;");
+			   ResultSet users = stmt3.executeQuery("SELECT * FROM users order by id asc;");
 			   String u_name = "";
 			   String u_id = "";
 			   String u_state = "";
+			   
 			   while (users.next()){
 				   if (rowDD.equals("States") && rowDD != null)
 				   { customerRow = false; }
