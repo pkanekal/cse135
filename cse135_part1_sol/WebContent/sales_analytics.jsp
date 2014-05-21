@@ -10,6 +10,7 @@
 	<%
 		Connection conn=null;
 		Statement stmt;
+		Statement stmt2;
 		ResultSet rs=null;
 		ResultSet categories=null;
 		String SQL=null;
@@ -133,26 +134,35 @@
 				ResultSet products = stmt.executeQuery("SELECT * FROM products order by id asc;");
 				String p_name = "";
 				double totalSalesPerProduct = 0.0;
-				
+				ResultSet salesPerProduct = null;
+				stmt2 = conn.createStatement();
+				//StringBuilder query;
 				while (products.next()) {
 					p_name = products.getString(3); // product name
 					int p_id = products.getInt(1);  // product id
-					System.err.println(p_id);
-					// take filters into account
-					String query = "SELECT SUM (p.price)FROM users AS u, products AS p, categories AS c, sales as t WHERE u.id = t.id AND p.id =t.pid AND p.id='" + p_id+"'";
-					ResultSet salesPerProduct = stmt.executeQuery(query);
+					
+					// TODO:take filters into account
+					//query.append("SELECT SUM(sales.quantity*sales.price) FROM sales,products");
+					
+					//if (!request.getParameter("category").equals("All"))
+						// add category filtering
+						
+					String query = "SELECT SUM(sales.quantity*sales.price) FROM sales,products WHERE products.id = '"+ p_id +"' AND sales.pid = products.id;";
+					//query = "SELECT * FROM sales,products,users, categories WHERE products.id = '"+p_id+"'' AND sales.pid = products.id AND users.id = sales.uid AND categories.id = products.cid";
+					
+					salesPerProduct = stmt2.executeQuery(query.toString());
 					
 					if (salesPerProduct.next())
 						totalSalesPerProduct = salesPerProduct.getInt(1);
-				%>	
-				<th><%=p_name %><br>($<%=totalSalesPerProduct %>)</th> <%
-
-					// SELECT SUM (p.price)
-					// FROM users AS u, products AS p, categories AS c, carts as t
-					// WHERE u.id = t.uid, p.id = t.pid, 
-					// c.name = 'testCat', u.state = 'testState', 
-				}
-			%>
+					salesPerProduct = null;
+					
+					// Truncate product name if greater than 10 chars
+					if (p_name.length() > 10) {
+						p_name = p_name.substring(0, 9);
+					}
+			%>	
+				<th><%=p_name %><br>($<%=totalSalesPerProduct %>)</th> 
+			<% }  %>
 			
 		</tr>
 	</table>
