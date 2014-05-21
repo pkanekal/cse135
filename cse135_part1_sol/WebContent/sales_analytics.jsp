@@ -203,9 +203,9 @@
 			   %>
 			   <% if (customerRow){ %>
 			   <th><%=u_id %></th><th><%=u_name %><br>($<%=information %>)</th> 
-			   <% else{ %> 
+			   <% } %> 
+			   <% if (!customerRow){ %>
 			   <th><%=u_state %><br>($<%=information %>)</th> 
-			   <% } %>
 			   <% } %>
 			   <% } %>
 			   <% 
