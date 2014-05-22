@@ -34,7 +34,7 @@
 		<b>Row Drop Down:</b>
 		<select name="rowDD">
 			<option value="Customers">Customers</option>
-			<option value="States">Customer States</option>
+			<option value="States">States</option>
 		</select>
 		<input type="submit" value="Run Query">
 		<br>
@@ -123,6 +123,7 @@
 <div style="width:79%; position:absolute; top:50px; right:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 	<table width="100%"  border="1px" align="center">
 		<tr>
+		<th></th>
 			<%
 				// Get filter options
 				String state = request.getParameter("state");
@@ -130,7 +131,13 @@
 				String age = request.getParameter("age");
 				
 				// Get products & total sales for column headers
-				ResultSet products = stmt.executeQuery("SELECT * FROM products order by id asc;");
+				ResultSet products;
+				
+				if (category.equals("All"))
+					products = stmt.executeQuery("SELECT * FROM products order by id asc;");
+				else
+					products = stmt.executeQuery("SELECT * FROM products, categories WHERE products.cid=categories.id AND categories.name='"+category+"' order by products.id asc;");
+
 				String p_name = "";
 				double totalSalesPerProduct = 0.0;
 				ResultSet salesPerProduct = null;
@@ -187,77 +194,208 @@
 						}
 						
 					}
-					System.err.println(query.toString());
-					System.err.println("----------------------------");
+
 					salesPerProduct = stmt2.executeQuery(query.toString());
 					
 					if (salesPerProduct.next())
 						totalSalesPerProduct = salesPerProduct.getInt(1);
-					salesPerProduct = null;
 					
 					// Truncate product name if greater than 10 chars
-					if (p_name.length() > 10) {
+					if (p_name.length() > 10) 
 						p_name = p_name.substring(0, 9);
-					}
 			%>	
 				<th><%=p_name %><br>($<%=totalSalesPerProduct %>)</th> 
 				
-			<% }  %>
-		
-			   <% 
-			   String rowDD = request.getParameter("rowDD"); 
-			   String stateSelection = request.getParameter("state");
-			   String query1 = "";
-			   String information ="";
-			   
-			   Statement stmt3 = conn.createStatement();
-			   boolean customerRow = true;
-			   ResultSet users = stmt3.executeQuery("SELECT * FROM users order by id asc;");
-			   String u_name = "";
-			   String u_id = "";
-			   String u_state = "";
-			   
-			   while (users.next()){
-				   if (rowDD.equals("States") && rowDD != null)
-				   { customerRow = false; }
-				   
-				   if (rowDD.equals("States") && !customerRow){
-					   query1 = "SELECT state FROM users ORDER BY state asc";
-					   u_state = users.getString(5);
-				   }
-				   else{
-					   if (stateSelection.equals("all") && customerRow){
-						   query1 = "SELECT id, name FROM users ORDER BY name asc";
-						   u_id= users.getString(1);
-						   u_name = users.getString(2);		 
-					   }
-					   else{
-					   query1 = "SELECT id, name FROM users WHERE state = '"+ stateSelection +"' ORDER BY name asc";
-					   u_id = users.getString(1);
-					   u_name = users.getString(2);
-				   	   }
-				   }
-				   ResultSet customerState = stmt.executeQuery(query1.toString());
-				   while (customerState.next()){
-					   information = customerState.getString(1);
-				   }
-				   customerState = null; 
-			   
-			   %>
-			   <% if (customerRow){ %>
-			   <th><%=u_id %></th><th><%=u_name %><br>($<%=information %>)</th> 
-			   <% } %> 
-			   <% if (!customerRow){ %>
-			   <th><%=u_state %><br>($<%=information %>)</th> 
-			   <% } %>
-			   <% } %>
-			   <% 
-			   //per product/each user
-			   //SELECT u.name, p.name, (c.quantity * c.price) as ProductSpentPer FROM users u, carts c, products p WHERE c.uid = u.id AND p.id = c.pid
-			%>
-			
-			
+			<% } %>
 		</tr>
+		<% 
+			Statement stmt3 = conn.createStatement();
+			Statement stmt4 = conn.createStatement();
+			double totalSalesPerUser = 0.0;
+
+			if (request.getParameter("rowDD").equals("Customers")) { // Rows are customers
+				
+				StringBuilder userQuery = new StringBuilder();
+				userQuery.append("SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales");
+
+				// if any filter is applied, add 'WHERE'
+				userQuery.append(" WHERE users.id = sales.uid");
+				
+				// filter for state
+				if (!state.equals("All") && state != null) 
+					userQuery.append(" AND users.state = '"+state+"' ");
+				
+				// filter for age
+				if( !age.equals("All") && age != null) {
+
+					switch (Integer.parseInt(age)) {
+					case 0:
+						// 12-18
+						userQuery.append(" AND users.age > '11' AND users.age < '18' ");
+						break;
+					case 1:
+						// 18-45
+						userQuery.append(" AND users.age > '18' AND users.age < '45' ");
+						break;
+					case 2:
+						// 45-65
+						userQuery.append(" AND users.age > '44' AND users.age < '65' ");	
+						break;
+					case 3:
+						// 65-
+						userQuery.append(" AND users.age > '64' ");
+	
+						break;
+					}
+					
+				}
+				userQuery.append(" GROUP BY users.id ORDER by users.id asc");
+				System.err.println(userQuery.toString());
+				ResultSet userSet = stmt.executeQuery(userQuery.toString());
+				while (userSet.next()){
+
+					int u_id = userSet.getInt(1);
+					String u_name = userSet.getString(2);
+					totalSalesPerUser = userSet.getInt(3);
+					
+					// Truncate product name if greater than 10 chars
+					if (u_name.length() > 10) {
+						u_name = u_name.substring(0, 9);
+					}
+					%>	
+					<tr><th><%=u_name %><br>($<%=totalSalesPerUser %>)</th>
+					<%
+					
+					// QUERY FOR INNER CELLS
+					if (category.equals("All"))
+						products = stmt3.executeQuery("SELECT * FROM products order by id asc;");
+					else
+						products = stmt3.executeQuery("SELECT * FROM products, categories WHERE products.cid=categories.id AND categories.name='"+category+"' order by products.id asc;");
+					
+					while (products.next()) {
+						int p_id = products.getInt(1);  // product id
+						String cellQuery = "SELECT SUM(sales.quantity*sales.price) FROM sales, products, users"
+						+" WHERE users.id=sales.uid AND products.id=sales.pid AND products.id='"+p_id+"' AND users.id = '"+u_id+"'";
+
+						ResultSet cell = stmt4.executeQuery(cellQuery);
+
+						if (cell.next())
+							%><td><%=cell.getInt(1) %> </td><% 
+					}
+					%>
+					</tr>					
+				<% 
+				}
+			}
+			else { // Rows are states
+				double salesPerState = 0.0;
+				// only displaying states with users in it.
+				ResultSet stateSet = null;
+				if (state.equals("All"))
+					stateSet = stmt2.executeQuery("SELECT state FROM users order by state asc;");
+				else
+					stateSet = stmt2.executeQuery("SELECT state FROM users WHERE state = '"+state+"'order by state asc;");
+				
+				while (stateSet.next()) {
+					String rowState = stateSet.getString(1);
+					
+					// get total sales per state
+					StringBuilder stateTotalQuery = new StringBuilder();
+					stateTotalQuery.append("SELECT SUM(sales.quantity*sales.price) FROM sales, users ");
+	
+					if (!category.equals("All") && category != null || !age.equals("All") && age != null)
+						stateTotalQuery.append(", categories, products ");
+
+					// General Case
+					stateTotalQuery.append("WHERE users.id=sales.uid AND state = '"+rowState+"' ");
+
+					// category filter
+					if (!category.equals("All") && category != null)
+						stateTotalQuery.append("AND categories.id = products.cid AND categories.name = '" + category +"' ");
+					
+					// age filter
+					if( !age.equals("All") && age != null) {
+
+						switch (Integer.parseInt(age)) {
+						case 0:
+							// 12-18
+							stateTotalQuery.append(" AND users.age > '11' AND users.age < '18'");
+							break;
+						case 1:
+							// 18-45
+							stateTotalQuery.append(" AND users.age > '18' AND users.age < '45'");
+							break;
+						case 2:
+							// 45-65
+							stateTotalQuery.append(" AND users.age > '44' AND users.age < '65'");	
+							break;
+						case 3:
+							// 65-
+							stateTotalQuery.append(" AND users.age > '64' ");
+
+							break;
+						}	
+					}
+					ResultSet q = stmt.executeQuery(stateTotalQuery.toString());
+					double totalPerState = 0.0;
+					
+					if (q.next())
+						totalPerState = q.getInt(1);
+					
+					%>	
+					<tr><th><%=rowState %><br>($<%=totalPerState %>)</th>
+					<%
+					if (category.equals("All"))
+						products = stmt3.executeQuery("SELECT * FROM products order by id asc;");
+					else
+						products = stmt3.executeQuery("SELECT * FROM products, categories WHERE products.cid=categories.id AND categories.name='"+category+"' order by products.id asc;");
+					
+					// INNER CELLS
+					while(products.next()) {
+						int p_id = products.getInt(1);  // product id
+						
+						// add age and category filters
+						StringBuilder cellQuery = new StringBuilder();
+						cellQuery.append("SELECT SUM(sales.quantity*sales.price) FROM sales, products, users, categories "
+								+ "WHERE users.id=sales.uid AND products.id=sales.pid AND products.id='"+p_id+"' AND state = '"+rowState+"'");
+						
+						// category filter
+						if (!category.equals("All") && category != null)
+							cellQuery.append("AND categories.id = products.cid AND categories.name = '" + category +"' ");
+						
+						// age filter
+						if( !age.equals("All") && age != null) {
+
+							switch (Integer.parseInt(age)) {
+							case 0:
+								// 12-18
+								cellQuery.append(" AND users.age > '11' AND users.age < '18'");
+								break;
+							case 1:
+								// 18-45
+								cellQuery.append(" AND users.age > '18' AND users.age < '45'");
+								break;
+							case 2:
+								// 45-65
+								cellQuery.append(" AND users.age > '44' AND users.age < '65'");	
+								break;
+							case 3:
+								// 65-
+								cellQuery.append(" AND users.age > '64' ");
+
+								break;
+							}	
+						}
+						ResultSet sales = stmt4.executeQuery(cellQuery.toString());
+						if (sales.next())
+							%><td><%=sales.getInt(1) %> </td><%
+					} %>
+					</tr> <% 
+					
+				}
+			}
+				
+		%>
 	</table>
 </div>
 	<%
