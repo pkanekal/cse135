@@ -243,7 +243,7 @@ else if (rowDD.equals("Customers") && rowDD != null))
 				  "order by users.id asc "+
 				  "offset " + offsetvar2 + "fetch next 20 rows only;";
 	}
-		// if there is an age filter
+		// if there is an age
 	else if (!age.equals("All") && age != null && state.equals("All"))
 	{
 		SQL_2="select  users.id , users.name, sum(s.quantity*s.price) as amount from users, sales,  products "+
