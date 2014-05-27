@@ -231,6 +231,7 @@ boolean stateFilter = (!state.equals("All") && state != null);
 
 System.err.println(SQL_1.toString());
 
+
 boolean stateRow = true;
 String rowDD = request.getParameter("rowDD"); 
 // if states was chosen as the row value
