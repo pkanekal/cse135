@@ -164,10 +164,10 @@ try
 			Age:
 			<select name="age">
 				<option value="All">All</option>
-				<option value= "12 and 18">12-18</option>
-				<option value= "18 and 45">18-45</option>
-				<option value= "45 and 65">45-65</option>
-				<option value= "65 and 200">65-</option>
+				<option value= "12 AND 18">12-18</option>
+				<option value= "18 AND 45">18-45</option>
+				<option value= "45 AND 65">45-65</option>
+				<option value= "65 AND 200">65-</option>
 			</select>
 		</div>
 	</form>
@@ -179,31 +179,58 @@ try
 String state = request.getParameter("state");
 String category = request.getParameter("category");
 String age = request.getParameter("age");
-String SQL_1 = null;
-String SQL_2 = null;
-String SQL_3 = null;
+
+StringBuilder SQL_1 = new StringBuilder();
+String SQL_2;
+String SQL_3;
+
+boolean ageFilter = (!age.equals("All") && age != null);
+boolean categoryFilter = (!category.equals("All") && category != null) ;
+boolean stateFilter = (!state.equals("All") && state != null);
+
+// PRODUCTS with  filters 
+
+// SELECT
+	SQL_1.append("SELECT p.id, p.name, SUM(s.quantity*s.price) ");
+
+// FROM
+	SQL_1.append("FROM products p, sales s ");
+		
+	// if category filtering on
+	if (categoryFilter)
+		SQL_1.append(", categories c ");
+	
+	// if age or state filtering on
+	if (ageFilter || stateFilter) 
+		SQL_1.append(", users u ");
+		
+// WHERE
+	SQL_1.append("WHERE s.pid = p.id ");
+
+	// if category filtering is on
+	if (categoryFilter)
+		SQL_1.append("AND p.cid = c.id AND c.name = '"+ category +"' ");
+	
+	// if age filtering is on
+	if (ageFilter)
+		SQL_1.append("AND u.age BETWEEN "+ age +" ");
+	
+	// if state firltering is on
+	if (stateFilter)
+		SQL_1.append("AND u.state = '"+ state + "' AND u.id = s.uid ");
+
+// GROUP BY
+	SQL_1.append("GROUP BY p.name, p.id ");
 
 
-// PRODUCTS aka column filters 
-// no filters
-if (category.equals("All") || category == null)
-{
-	System.out.println("a");
-	SQL_1 = "SELECT p.id, p.name, SUM(s.quantity*s.price) as amount from products p, sales s "+
-	    	 "WHERE p.id = s.pid "+
-			 "GROUP BY p.name, p.id "+
-			 "ORDER BY p.name asc ";
+// ORDER BY
+	SQL_1.append("ORDER BY p.name asc ");
 
-}
-// if there is a filter, then take into account the category name
-else 
-{
-	System.out.println("b");
-	SQL_1 =  "SELECT p.id, p.name, SUM(s.quantity*s.price) as amount from products p, sales s "+
-			 "WHERE p.id = s.pid AND p.cid='"+ category +"' " +
-			 "GROUP BY p.name, p.id "+
-			 "ORDER BY p.name asc ";
-}
+// PAGINATION
+	SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY");
+
+System.err.println(SQL_1.toString());
+
 boolean stateRow = true;
 String rowDD = request.getParameter("rowDD"); 
 // if states was chosen as the row value
@@ -256,39 +283,36 @@ else if (rowDD.equals("Customers") && rowDD != null)
 	else if (!age.equals("All") && age != null && state.equals("All"))
 	{
 		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products "+
-		      "WHERE users.id = sales.uid and sales.pid=products.id AND users.age='"+ age +"' " + 
+		      "WHERE users.id = sales.uid and sales.pid=products.id AND users.age BETWEEN'"+ age +"' " + 
 			  "GROUP BY users.id "+ 
 		      "ORDER BY users.id asc ";
 		stateRow = false;
-		System.out.println("3st check");
+		System.out.println("3rd check");
 	}
 	  //age/state both filtered turned on 
 	  else if(!age.equals("All") && age != null && !state.equals("All") && state !=null )
 	  {
 		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products "+
-			  "WHERE users.id = sales.uid and sales.pid=products.id AND users.age='"+ age + "users.state='" + state + "' " + 
+			  "WHERE users.id = sales.uid and sales.pid=products.id AND users.age BETWEEN '"+ age + "users.state='" + state + "' " + 
 		      "GROUP BY users.id "+ 
 			  "ORDER BY users.id asc ";
 		stateRow = false;
-		System.out.println("4st check");
+		System.out.println("4th check");
 	  }
 }
 
 
-rs=stmt.executeQuery(SQL_1);
+rs=stmt.executeQuery(SQL_1.toString());
 int product_id=0;
 String product_name = null;
 float product_price = 0;
 while (rs.next()){
-	product_id = rs.getInt(1);
-	product_name = rs.getString(2);
-	product_price = rs.getFloat(3);
+
 	Product product = new Product();
-	product.setId(product_id);
-	product.setName(product_name);
-	product.setPrice(product_price);
+	product.setId(rs.getInt(1));
+	product.setName(rs.getString(2));
+	product.setPrice(rs.getFloat(3));
 	productlist.add(product);
-	//System.out.println("Hi");
 }
 %>
 	<table align="center" width="98%" border="1">
@@ -305,11 +329,11 @@ for(int i=0;i<productlist.size();i++)
 	product_id			=   productlist.get(i).getId();
 	product_name	    =	productlist.get(i).getName();
 	product_price	    =	productlist.get(i).getPrice();
-	%><td><%=product_name%><br><%=product_price %> </td><% 
+	%><td><%= product_name %><br><%=product_price %> </td><% 
 }
 %></tr>
 <% 
-
+/*
 rs2=stmt2.executeQuery(SQL_2);
 System.out.println("rs2 query");
 String customer_name=null;
@@ -330,9 +354,8 @@ while(rs2.next())
 for(int i=0;i<customerlist.size();i++)
 {
 	customer_name	=	customerlist.get(i).getName();
-	customer_price	=	customerlist.get(i).getPrice();
-	%><tr><th><%=customer_name %><br>($<%=customer_price %>)</th><% 
-}
+	customer_price	=	customerlist.get(i).getPrice();*/
+/*}
 }
 else{
 	while(rs2.next())
@@ -351,15 +374,14 @@ else{
 	for(int i=0;i<customerlist.size();i++)
 	{
 		customer_name	=	customerlist.get(i).getName();
-		customer_price	=	customerlist.get(i).getPrice();
-		%><tr><th><%=customer_name %><br>($<%=customer_price %>)</th><% 
+		customer_price	=	customerlist.get(i).getPrice();*/
 				//FOR EVERY ROW, BUILD THE INNER DATA USING COMBINATION OF CUSTOMER NAME AND THE PRODUCT NAME
 				// DO SUM QUERY 
 				//"SELECT SUM(sales.price*sales.quantity) FROM users, sales, products"+
 				//"WHERE "
-	}
+	/*}
 }
- 
+ */
 }
 
 		
