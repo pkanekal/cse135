@@ -276,7 +276,8 @@
 						int p_id = products.getInt(1);  // product id
 						String cellQuery = "SELECT SUM(sales.quantity*sales.price) FROM sales, products, users"
 						+" WHERE users.id=sales.uid AND products.id=sales.pid AND products.id='"+p_id+"' AND users.id = '"+u_id+"'";
-
+						System.err.println(cellQuery.toString());
+						System.err.println("--------------------------------");
 						ResultSet cell = stmt4.executeQuery(cellQuery);
 
 						if (cell.next())

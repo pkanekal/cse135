@@ -172,6 +172,7 @@ try
 		</div>
 	</form>
 </div>
+<div style="width:79%; position:absolute; top:50px; right:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 
 <%
 // save the values of the filters
@@ -198,8 +199,8 @@ if (category.equals("All") || category == null)
 else 
 {
 	System.out.println("b");
-	SQL_1 =  "SELECT p.id, p.name, SUM(s.quantity*s.price) as amount from products p, sales s"+
-			 "WHERE p.id = s.pid AND p.cid='"+ category +"'" +
+	SQL_1 =  "SELECT p.id, p.name, SUM(s.quantity*s.price) as amount from products p, sales s "+
+			 "WHERE p.id = s.pid AND p.cid='"+ category +"' " +
 			 "GROUP BY p.name, p.id "+
 			 "ORDER BY p.name asc ";
 }
@@ -220,7 +221,7 @@ if (rowDD.equals("States") && rowDD != null)
 	else
 	{
 		SQL_2="SELECT users.state, SUM(sales.quantity*sales.price) from users, sales, products "+
-			  "WHERE users.id = sales.uid and sales.pid=products.id AND users.state='" + state + "'" +
+			  "WHERE users.id = sales.uid and sales.pid=products.id AND users.state='" + state + "' " +
 			  "GROUP BY users.state "+ 
 			  "ORDER BY users.state asc";
 	}
@@ -233,7 +234,7 @@ else if (rowDD.equals("Customers") && rowDD != null)
 	//default case
 	if(state == null || state.equals("All") || age.equals("All"))
 	{
-		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products"+
+		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products "+
 		      "WHERE users.id = sales.uid and sales.pid=products.id "+ 
 			  "GROUP BY users.id "+ 
 			  "ORDER BY users.id asc ";
@@ -244,8 +245,8 @@ else if (rowDD.equals("Customers") && rowDD != null)
 	else if(!state.equals("All") && state !=null && age.equals("All")) 
 	{
 			//no filters	
-		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products"+
-			  "WHERE users.id = sales.uid and sales.pid=products.id AND users.state='"+ state +"'" + 
+		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products "+
+			  "WHERE users.id = sales.uid and sales.pid=products.id AND users.state='"+ state +"' " + 
 		      "GROUP BY users.id "+ 
 			  "ORDER BY users.id asc ";
 			stateRow = false;
@@ -254,8 +255,8 @@ else if (rowDD.equals("Customers") && rowDD != null)
 		// if there is an age
 	else if (!age.equals("All") && age != null && state.equals("All"))
 	{
-		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products"+
-		      "WHERE users.id = sales.uid and sales.pid=products.id AND users.age='"+ age +"'" + 
+		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products "+
+		      "WHERE users.id = sales.uid and sales.pid=products.id AND users.age='"+ age +"' " + 
 			  "GROUP BY users.id "+ 
 		      "ORDER BY users.id asc ";
 		stateRow = false;
@@ -264,8 +265,8 @@ else if (rowDD.equals("Customers") && rowDD != null)
 	  //age/state both filtered turned on 
 	  else if(!age.equals("All") && age != null && !state.equals("All") && state !=null )
 	  {
-		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products"+
-			  "WHERE users.id = sales.uid and sales.pid=products.id AND users.age='"+ age + "users.state='" + state + "'" + 
+		SQL_2="SELECT users.id, users.name, SUM(sales.price*sales.quantity) FROM users, sales, products "+
+			  "WHERE users.id = sales.uid and sales.pid=products.id AND users.age='"+ age + "users.state='" + state + "' " + 
 		      "GROUP BY users.id "+ 
 			  "ORDER BY users.id asc ";
 		stateRow = false;
@@ -298,7 +299,7 @@ while (rs.next()){
 		%> <td>State</td> <% } %>
 
 <%	
-System.out.println(productlist.size());
+System.out.println("productlist size: " + productlist.size());
 for(int i=0;i<productlist.size();i++)
 {
 	product_id			=   productlist.get(i).getId();
@@ -372,5 +373,8 @@ finally
 	conn.close();
 }	
 %>	
+</tr>
+</table>
+</div>
 </body>
 </html>
