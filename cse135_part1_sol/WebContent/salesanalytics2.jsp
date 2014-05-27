@@ -199,10 +199,9 @@ if (category.equals("All") || category == null)
 else 
 {
 	System.out.println("b");
-	SQL_1 =  "SELECT p.id, p.name, SUM(s.quantity*s.price) as amount from products p, sales s "+
-			 "WHERE p.id = s.pid AND p.cid='"+ category +"' " +
-			 "GROUP BY p.name, p.id "+
-			 "ORDER BY p.name asc ";
+	SQL_1 =  "SELECT p.id, p.name, SUM(s.quantity*s.price) as amount from products p, sales s, categories " + 
+	         "WHERE p.id = s.pid AND categories.id = p.cid AND categories.name = '" + category +"' " + 
+	         "GROUP BY p.name, p.id " + "ORDER BY p.name asc ";
 }
 boolean stateRow = true;
 String rowDD = request.getParameter("rowDD"); 
