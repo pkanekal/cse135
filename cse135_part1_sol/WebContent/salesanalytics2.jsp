@@ -79,7 +79,7 @@ try
 
 	%>
 	<!------------------Left Side Panel------------------->
-	<div style="width:20%; position:absolute; top:50px; left:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;"></div>	
+	<div style="width:20%; position:absolute; top:50px; left:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 	<form action="salesanalytics2.jsp" method="post">
 		<b>Row Drop Down:</b>
 		<select name="rowDD">
