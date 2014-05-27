@@ -194,28 +194,21 @@ boolean stateFilter = (!state.equals("All") && state != null);
 	SQL_1.append("SELECT p.id, p.name, SUM(s.quantity*s.price) ");
 
 // FROM
-	SQL_1.append("FROM products p, sales s ");
+	SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
 		
 	// if category filtering on
 	if (categoryFilter)
-		SQL_1.append(", categories c ");
+		SQL_1.append("INNER JOIN categories c ON c.id = p.cid AND c.name = '"+category+"' ");
 	
 	// if age or state filtering on
 	if (ageFilter || stateFilter) 
-		SQL_1.append(", users u ");
+		SQL_1.append("INNER JOIN users u ON u.id = s.uid ");
 		
-// WHERE
-	SQL_1.append("WHERE s.pid = p.id ");
-
-	// if category filtering is on
-	if (categoryFilter)
-		SQL_1.append("AND p.cid = c.id AND c.name = '"+ category +"' ");
-	
 	// if age filtering is on
 	if (ageFilter)
 		SQL_1.append("AND u.age BETWEEN "+ age +" ");
 	
-	// if state firltering is on
+	// if state filtering is on
 	if (stateFilter)
 		SQL_1.append("AND u.state = '"+ state + "' AND u.id = s.uid ");
 
