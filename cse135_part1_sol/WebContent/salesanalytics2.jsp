@@ -156,7 +156,7 @@ try
 				while (categories.next()) { 
 					int c_id = categories.getInt(1);
 					String c_name = categories.getString(2);
-					out.println("<option id=\""+c_id+"\">"+c_name+"</option>");					
+					out.println("<option id=\""+c_id+"\" value=\""+c_id+"\">"+c_name+"</option>");					
 				 } %>  
 				 
 			</select>
@@ -237,12 +237,12 @@ if (rowDD.equals("States") && rowDD != null)
 		SQL_2.append("SELECT u.state, SUM(s.quantity*s.price) ");
 
 	// FROM
-		SQL_2.append("FROM users u INNER JOIN sales s ON u.id = s.uid ");
+		SQL_2.append("FROM users u LEFT OUTER JOIN sales s ON u.id = s.uid ");
 			
 		// if category filtering on
 		if (categoryFilter)
-			SQL_2.append(", products INNER JOIN categories c ON c.id = products.cid AND c.name = '"+category+"' ");
-			
+		//	SQL_2.append(", products INNER JOIN categories c ON c.id = products.cid AND c.name = '"+category+"' ");
+			SQL_2.append("LEFT OUTER JOIN products ON s.pid = p.id AND p.cid = "+category);
 		// if age filtering is on
 		if (ageFilter)
 			SQL_2.append("AND u.age BETWEEN "+ age +" ");
