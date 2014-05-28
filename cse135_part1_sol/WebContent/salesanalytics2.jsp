@@ -60,6 +60,8 @@ Statement stmt;
 Statement stmt2;
 ResultSet rs=null;
 ResultSet rs2=null; 
+Statement stmt3;
+ResultSet stateSet = null;
 
 ResultSet categories=null;
 String SQL=null;
@@ -76,6 +78,13 @@ try
 	conn =DriverManager.getConnection(url, user, password);
 	stmt =conn.createStatement();
 	stmt2 =conn.createStatement();
+	stmt3 =conn.createStatement();
+
+	// save the values of the filters
+	String state = request.getParameter("state");
+	String category = request.getParameter("category");
+	String age = request.getParameter("age");
+	String rowDD = request.getParameter("rowDD"); 
 
 	%>
 	<!------------------Left Side Panel------------------->
@@ -83,8 +92,8 @@ try
 	<form action="salesanalytics2.jsp" method="post">
 		<b>Row Drop Down:</b>
 		<select name="rowDD">
-			<option value="Customers">Customers</option>
-			<option value="States">Customer States</option>
+			<option value="Customers" <% if (rowDD.equals("Customers")) out.println("selected"); %>>Customers</option>
+			<option value="States" <% if (rowDD.equals("States")) out.println("selected"); %>>Customer States</option>
 		</select>
 		<input type="submit" value="Run Query">
 		<br>
@@ -92,57 +101,18 @@ try
 		<div id="filter">
 			State: 
 			<select name="state">
-				<option value="All">All</option>
-				<option value="Alabama">Alabama</option>
-				<option value="Alaska">Alaska</option>
-				<option value="Arizona">Arizona</option>
-				<option value="Arkansas">Arkansas</option>
-				<option value="california">California</option>
-				<option value="Colorado">Colorado</option>
-				<option value="Connecticut">Connecticut</option>
-				<option value="Delaware">Delaware</option>
-				<option value="Florida">Florida</option>
-				<option value="Georgia">Georgia</option>
-				<option value="Hawaii">Hawaii</option>
-				<option value="Idaho">Idaho</option>
-				<option value="Illinois">Illinois</option>
-				<option value="Indiana">Indiana</option>
-				<option value="Iowa">Iowa</option>
-				<option value="Kansas">Kansas</option>
-				<option value="Kentucky">Kentucky</option>
-				<option value="Louisiana">Louisiana</option>
-				<option value="Maine">Maine</option>
-				<option value="Maryland">Maryland</option>
-				<option value="Massachusetts">Massachusetts</option>
-				<option value="Michigan">Michigan</option>
-				<option value="Minnesota">Minnesota</option>
-				<option value="Mississippi">Mississippi</option>
-				<option value="Missouri">Missouri</option>
-				<option value="Montana">Montana</option>
-				<option value="Nebraska">Nebraska</option>
-				<option value="Nevada">Nevada</option>
-				<option value="New Hampshire">New Hampshire</option>
-				<option value="New Jersey">New Jersey</option>
-				<option value="New Mexico">New Mexico</option>
-				<option value="New York">New York</option>
-				<option value="North Carolina">North Carolina</option>
-				<option value="North Dakota">North Dakota</option>
-				<option value="Ohio">Ohio</option>
-				<option value="Oklahoma">Oklahoma</option>
-				<option value="Oregon">Oregon</option>
-				<option value="Pennsylvania">Pennsylvania</option>
-				<option value="Rhode Island">Rhode Island</option>
-				<option value="South Carolina">South Carolina</option>
-				<option value="South Dakota">South Dakota</option>
-				<option value="Tennessee">Tennessee</option>
-				<option value="Texas">Texas</option>
-				<option value="Utah">Utah</option>
-				<option value="Vermont">Vermont</option>
-				<option value="Virginia">Virginia</option>
-				<option value="Washington">Washington</option>
-				<option value="West Virginia">West Virginia</option>
-				<option value="Wisconsin">Wisconsin</option>
-				<option value="Wyoming">Wyoming</option>
+				<%
+				stateSet = stmt3.executeQuery("SELECT * FROM state order by id asc");
+				out.println("<option value=\"All\"> All </option> ");
+				while (stateSet.next()) {
+					String stateName = stateSet.getString(2);
+					if (!stateName.equals(state))
+						out.println("<option value=\""+stateName+"\">"+stateName+"</option>");
+					else
+						out.println("<option value=\""+stateName+"\" selected>"+stateName+"</option>");
+
+				}
+				%>
 			</select>
 			<br>
 			Category:
@@ -156,18 +126,23 @@ try
 				while (categories.next()) { 
 					int c_id = categories.getInt(1);
 					String c_name = categories.getString(2);
-					out.println("<option id=\""+c_id+"\" value=\""+c_id+"\">"+c_name+"</option>");					
+
+					if (!category.equals(""+c_id))
+						out.println("<option value=\""+c_id+"\">"+c_name+"</option>");
+					else
+						out.println("<option value=\""+c_id+"\" selected>"+c_name+"</option>");
+
 				 } %>  
 				 
 			</select>
 			<br>
 			Age:
 			<select name="age">
-				<option value="All">All</option>
-				<option value= "12 AND 18">12-18</option>
-				<option value= "18 AND 45">18-45</option>
-				<option value= "45 AND 65">45-65</option>
-				<option value= "65 AND 200">65-</option>
+				<option value="All" <% if (age.equals("All")) out.println("selected"); %>>All</option>
+				<option value= "12 AND 18" <% if (age.equals("12 AND 18")) out.println("selected"); %>>12-18</option>
+				<option value= "18 AND 45" <% if (age.equals("18 AND 45")) out.println("selected"); %>>18-45</option>
+				<option value= "45 AND 65" <% if (age.equals("45 AND 65")) out.println("selected"); %>>45-65</option>
+				<option value= "65 AND 200" <% if (age.equals("65 AND 200")) out.println("selected"); %>>65-</option>
 			</select>
 		</div>
 	</form>
@@ -175,10 +150,7 @@ try
 <div style="width:79%; position:absolute; top:50px; right:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 
 <%
-// save the values of the filters
-String state = request.getParameter("state");
-String category = request.getParameter("category");
-String age = request.getParameter("age");
+
 
 StringBuilder SQL_1 = new StringBuilder();
 StringBuilder SQL_2 = new StringBuilder();
@@ -284,7 +256,6 @@ else{
 }
 
 boolean stateRow = true;
-String rowDD = request.getParameter("rowDD"); 
 // if states was chosen as the row value
 if (rowDD.equals("States") && rowDD != null)
 {
