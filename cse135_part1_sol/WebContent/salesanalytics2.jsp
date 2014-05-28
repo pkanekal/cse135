@@ -60,6 +60,8 @@ Statement stmt;
 Statement stmt2;
 ResultSet rs=null;
 ResultSet rs2=null; 
+Statement stmt3;
+ResultSet stateSet = null;
 
 ResultSet categories=null;
 String SQL=null;
@@ -76,15 +78,25 @@ try
 	conn =DriverManager.getConnection(url, user, password);
 	stmt =conn.createStatement();
 	stmt2 =conn.createStatement();
-
+	stmt3 =conn.createStatement();
+	Statement stmt4 = conn.createStatement();
+	// save the values of the filters
+	String state = request.getParameter("state");
+	String category = request.getParameter("category");
+	String age = request.getParameter("age");
+	String rowDD = request.getParameter("rowDD"); 
+	if (rowDD == null)
+		rowDD ="Customers";
+	if (age == null)
+		age = "All";
 	%>
 	<!------------------Left Side Panel------------------->
 	<div style="width:20%; position:absolute; top:50px; left:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 	<form action="salesanalytics2.jsp" method="post">
 		<b>Row Drop Down:</b>
 		<select name="rowDD">
-			<option value="Customers">Customers</option>
-			<option value="States">Customer States</option>
+			<option value="Customers" <% if (rowDD.equals("Customers")) out.println("selected"); %>>Customers</option>
+			<option value="States" <% if (rowDD.equals("States")) out.println("selected"); %>>Customer States</option>
 		</select>
 		<input type="submit" value="Run Query">
 		<br>
@@ -92,57 +104,18 @@ try
 		<div id="filter">
 			State: 
 			<select name="state">
-				<option value="All">All</option>
-				<option value="Alabama">Alabama</option>
-				<option value="Alaska">Alaska</option>
-				<option value="Arizona">Arizona</option>
-				<option value="Arkansas">Arkansas</option>
-				<option value="california">California</option>
-				<option value="Colorado">Colorado</option>
-				<option value="Connecticut">Connecticut</option>
-				<option value="Delaware">Delaware</option>
-				<option value="Florida">Florida</option>
-				<option value="Georgia">Georgia</option>
-				<option value="Hawaii">Hawaii</option>
-				<option value="Idaho">Idaho</option>
-				<option value="Illinois">Illinois</option>
-				<option value="Indiana">Indiana</option>
-				<option value="Iowa">Iowa</option>
-				<option value="Kansas">Kansas</option>
-				<option value="Kentucky">Kentucky</option>
-				<option value="Louisiana">Louisiana</option>
-				<option value="Maine">Maine</option>
-				<option value="Maryland">Maryland</option>
-				<option value="Massachusetts">Massachusetts</option>
-				<option value="Michigan">Michigan</option>
-				<option value="Minnesota">Minnesota</option>
-				<option value="Mississippi">Mississippi</option>
-				<option value="Missouri">Missouri</option>
-				<option value="Montana">Montana</option>
-				<option value="Nebraska">Nebraska</option>
-				<option value="Nevada">Nevada</option>
-				<option value="New Hampshire">New Hampshire</option>
-				<option value="New Jersey">New Jersey</option>
-				<option value="New Mexico">New Mexico</option>
-				<option value="New York">New York</option>
-				<option value="North Carolina">North Carolina</option>
-				<option value="North Dakota">North Dakota</option>
-				<option value="Ohio">Ohio</option>
-				<option value="Oklahoma">Oklahoma</option>
-				<option value="Oregon">Oregon</option>
-				<option value="Pennsylvania">Pennsylvania</option>
-				<option value="Rhode Island">Rhode Island</option>
-				<option value="South Carolina">South Carolina</option>
-				<option value="South Dakota">South Dakota</option>
-				<option value="Tennessee">Tennessee</option>
-				<option value="Texas">Texas</option>
-				<option value="Utah">Utah</option>
-				<option value="Vermont">Vermont</option>
-				<option value="Virginia">Virginia</option>
-				<option value="Washington">Washington</option>
-				<option value="West Virginia">West Virginia</option>
-				<option value="Wisconsin">Wisconsin</option>
-				<option value="Wyoming">Wyoming</option>
+				<%
+				stateSet = stmt3.executeQuery("SELECT * FROM state order by id asc");
+				out.println("<option value=\"All\"> All </option> ");
+				while (stateSet.next()) {
+					String stateName = stateSet.getString(2);
+					if (!stateName.equals(state))
+						out.println("<option value=\""+stateName+"\">"+stateName+"</option>");
+					else
+						out.println("<option value=\""+stateName+"\" selected>"+stateName+"</option>");
+
+				}
+				%>
 			</select>
 			<br>
 			Category:
@@ -156,29 +129,31 @@ try
 				while (categories.next()) { 
 					int c_id = categories.getInt(1);
 					String c_name = categories.getString(2);
-					out.println("<option id=\""+c_id+"\" value=\""+c_id+"\">"+c_name+"</option>");					
+
+					if (!category.equals(""+c_id))
+						out.println("<option value=\""+c_id+"\">"+c_name+"</option>");
+					else
+						out.println("<option value=\""+c_id+"\" selected>"+c_name+"</option>");
+
 				 } %>  
 
 			</select>
 			<br>
 			Age:
 			<select name="age">
-				<option value="All">All</option>
-				<option value= "12 AND 18">12-18</option>
-				<option value= "18 AND 45">18-45</option>
-				<option value= "45 AND 65">45-65</option>
-				<option value= "65 AND 200">65-</option>
+				<option value="All" <% if (age.equals("All")) out.println("selected"); %>>All</option>
+				<option value= "12 AND 18" <% if (age.equals("12 AND 18")) out.println("selected"); %>>12-18</option>
+				<option value= "18 AND 45" <% if (age.equals("18 AND 45")) out.println("selected"); %>>18-45</option>
+				<option value= "45 AND 65" <% if (age.equals("45 AND 65")) out.println("selected"); %>>45-65</option>
+				<option value= "65 AND 200" <% if (age.equals("65 AND 200")) out.println("selected"); %>>65-</option>
 			</select>
 		</div>
 	</form>
 </div>
-<div style="width:79%; position:absolute; top:50px; right:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+<div style="width:79%; position:absolute; top:50px; right:0px; height:90%;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 
 <%
-// save the values of the filters
-String state = request.getParameter("state");
-String category = request.getParameter("category");
-String age = request.getParameter("age");
+
 
 StringBuilder SQL_1 = new StringBuilder();
 StringBuilder SQL_2 = new StringBuilder();
@@ -191,63 +166,9 @@ boolean categoryFilter = (!category.equals("All") && category != null) ;
 boolean stateFilter = (!state.equals("All") && state != null);
 boolean Zeroes = false;
 
-if (stateFilter){
-	SQL_4="SELECT p.id, p.name, SUM(s.quantity*s.price) as total " +
-	"FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid INNER JOIN users u ON u.id = s.uid AND u.state ='" + state + "'AND u.id = s.uid " +
-	"GROUP BY p.name, p.id ORDER BY p.name asc OFFSET 0 FETCH NEXT 10 ROWS ONLY";
-	System.err.println(SQL_4.toString());
-
-	rs2=stmt2.executeQuery(SQL_4.toString());
-	if(!rs2.next()){
-		System.out.println("MUST DO FAT QUERY");
-		SQL_5="SELECT p.id, p.name, coalesce(Sum(total), 0) FROM products p LEFT OUTER JOIN " +
-			  "("+SQL_4+") " +
-			  "as x ON x.id = p.id GROUP BY p.id ORDER BY p.name asc OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY";
-		System.err.println(SQL_5.toString());
-		Zeroes = true;
-	}
-	else{
-
 	// PRODUCTS with  filters 
-
 	// SELECT
-		SQL_1.append("SELECT p.id, p.name, SUM(s.quantity*s.price) ");
-
-	// FROM
-		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
-
-
-		// if age or state filtering on
-		if (ageFilter || stateFilter) 
-			SQL_1.append("INNER JOIN users u ON u.id = s.uid ");
-
-		// if age filtering is on
-		if (ageFilter)
-			SQL_1.append("AND u.age BETWEEN "+ age +" ");
-
-		// if state filtering is on
-		if (stateFilter)
-			SQL_1.append("AND u.state = '"+ state + "' ");
-
-	// GROUP BY
-		SQL_1.append("GROUP BY p.name, p.id ");
-
-
-	// ORDER BY
-		SQL_1.append("ORDER BY p.name asc ");
-
-	// PAGINATION
-		SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY");
-
-	System.err.println("SQL 1 " + SQL_1.toString());
-
-	}
-}
-else{
-	// PRODUCTS with  filters 
-
-	// SELECT
-		SQL_1.append("SELECT p.id, p.name, SUM(s.quantity*s.price) ");
+		SQL_1.append("CREATE TEMPORARY TABLE tempProducts AS (SELECT p.id, p.name, SUM(s.quantity*s.price) ");
 
 	// FROM
 		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
@@ -277,19 +198,17 @@ else{
 		SQL_1.append("ORDER BY p.name asc ");
 
 	// PAGINATION
-		SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY");
-
+		SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY)");
+	System.err.println("SQL 1: ");
 	System.err.println(SQL_1.toString());
+	System.err.println();
 
-}
 
-boolean stateRow = true;
-String rowDD = request.getParameter("rowDD"); 
 // if states was chosen as the row value
 if (rowDD.equals("States") && rowDD != null)
 {
 	// SELECT
-		SQL_2.append("SELECT u.state, SUM(s.quantity*s.price) ");
+		SQL_2.append("CREATE TEMPORARY TABLE tempStates AS (SELECT u.state, SUM(s.quantity*s.price) ");
 
 	// FROM
 		SQL_2.append("FROM users u LEFT OUTER JOIN sales s ON u.id = s.uid ");
@@ -313,7 +232,7 @@ if (rowDD.equals("States") && rowDD != null)
 		SQL_2.append("ORDER BY u.state asc ");
 
 	// PAGINATION
-		SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 20 ROWS ONLY");
+		SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 20 ROWS ONLY)");
 	System.err.println("SQL 2: ");
 	System.err.println(SQL_2.toString());
 }
@@ -322,7 +241,7 @@ if (rowDD.equals("States") && rowDD != null)
 else if (rowDD.equals("Customers") && rowDD != null)
 {
 	// SELECT
-	SQL_2.append("SELECT u.name, SUM(s.quantity*s.price) ");
+	SQL_2.append("CREATE TEMPORARY TABLE tempCustomers AS (SELECT u.id, u.name, SUM(s.quantity*s.price) ");
 
 	// FROM
 	SQL_2.append("FROM users u LEFT OUTER JOIN sales s ON u.id = s.uid ");
@@ -340,23 +259,26 @@ else if (rowDD.equals("Customers") && rowDD != null)
 		SQL_2.append("AND u.state = '"+ state + "' ");
 
 	// GROUP BY
-	SQL_2.append("GROUP BY u.name ");
+	SQL_2.append("GROUP BY u.id, u.name ");
 
 	// ORDER BY
 	SQL_2.append("ORDER BY u.name asc ");
 
 	// PAGINATION
-	SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 20 ROWS ONLY");
+	SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 20 ROWS ONLY)");
 
 	System.err.println("SQL 2: ");
 	System.err.println(SQL_2.toString());
 }
-
 if (Zeroes){
 	rs=stmt.executeQuery(SQL_5);
+	System.err.println("executing sql 5...");
 }
 else{
-rs=stmt.executeQuery(SQL_1.toString());
+	System.err.println("selecting tempProducts");
+	stmt.execute(SQL_1.toString());
+	rs=stmt4.executeQuery("SELECT id, name, coalesce(sum,0) FROM tempproducts");
+	System.err.println("FLSKDJF");
 }
 int product_id=0;
 String product_name = null;
@@ -388,41 +310,65 @@ for(int i=0;i<productlist.size();i++)
 %></tr>
 <% 
 
-rs2=stmt2.executeQuery(SQL_2.toString());
+stmt2.execute(SQL_2.toString());
+
 System.out.println("rs2 query");
 String customer_name=null;
 float customer_price=0;
 int customer_id =0;
 
-if (stateRow){
+if (request.getParameter("rowDD").equals("States")){
+	System.out.println("IN THE IF RS2");
+
+	rs2=stmt2.executeQuery("SELECT * FROM tempStates");
+
 	while(rs2.next())
 	{
 		Customer customer =new Customer();
 		customer.setName(rs2.getString(1));
 		customer.setPrice(rs2.getFloat(2));
 		customerlist.add(customer);
-		System.out.println("IN THE IF RS2");
 	}
 
+	for(int i=0;i<customerlist.size();i++)
+	{
+		customer_name	=	customerlist.get(i).getName();
+		customer_price	=	customerlist.get(i).getPrice();
+		%><tr><td><%= customer_name %><br><%=customer_price %> </td> <%
+
+		%></tr><% 
+	}
 }
 else{
+	rs2=stmt2.executeQuery("SELECT * FROM tempCustomers");
+	ResultSet innerTable = stmt.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
+			+ "FROM sales s RIGHT OUTER JOIN (SELECT tempProducts.id AS pid, tempProducts.name, "
+			+ "tempProducts.sum, tempCustomers.id, tempCustomers.id AS cid, tempCustomers.name, "
+			+ "tempCustomers.sum FROM tempProducts, tempCustomers) AS y ON s.uid= y.cid AND s.pid= y.pid;");
 	while(rs2.next())
 	{
+		System.out.println("IN THE ELSE RS2");
 		Customer customer =new Customer();
 		customer.setName(rs2.getString(2));
 		customer.setPrice(rs2.getFloat(3));
 		customer.setId(rs2.getInt(1));
 		customerlist.add(customer);
-		System.out.println("IN THE ELSE RS2");
 	}
-}
 	for(int i=0;i<customerlist.size();i++)
 	{
 		customer_name	=	customerlist.get(i).getName();
 		customer_price	=	customerlist.get(i).getPrice();
-		%><tr><td><%= customer_name %><br><%=customer_price %> </td></tr><% 
+		%><tr><td><%= customer_name %><br><%=customer_price %> </td> <%
 
+		for (int j= 0; j < 10; j++) {
+			if (innerTable.next()) 
+			%> <td><%=innerTable.getInt(1) %></td><%
+
+		}
+		%></tr><% 
 	}
+}
+
 }
 
 
