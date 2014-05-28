@@ -17,7 +17,7 @@ class Customer
 	private int age = 0;
 	private String state;
 	private float price = 0f;
-	
+
 	public int getId() {return id;}
 	public void setId(int id) {	this.id = id;}
 	public String getName() {return name;}
@@ -38,7 +38,7 @@ class Product
 	private String name=null;
 	private int SKU = 0;
 	private float price = 0f;
-	
+
 	public int getId() {return id;}
 	public void setId(int id) {	this.id = id;}
 	public String getName() {return name;}
@@ -148,17 +148,17 @@ try
 			Category:
 			<select name="category">
 				<option value="All">All</option>
-				
+
 				<% // Populate category options
 				// Get categories
 				categories = stmt.executeQuery("SELECT * FROM categories order by id asc;");
-				
+
 				while (categories.next()) { 
 					int c_id = categories.getInt(1);
 					String c_name = categories.getString(2);
 					out.println("<option id=\""+c_id+"\" value=\""+c_id+"\">"+c_name+"</option>");					
 				 } %>  
-				 
+
 			</select>
 			<br>
 			Age:
@@ -189,44 +189,99 @@ String SQL_5 = null;
 boolean ageFilter = (!age.equals("All") && age != null);
 boolean categoryFilter = (!category.equals("All") && category != null) ;
 boolean stateFilter = (!state.equals("All") && state != null);
+boolean Zeroes = false;
+
+if (stateFilter){
+	SQL_4="SELECT p.id, p.name, SUM(s.quantity*s.price) as total " +
+	"FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid INNER JOIN users u ON u.id = s.uid AND u.state ='" + state + "'AND u.id = s.uid " +
+	"GROUP BY p.name, p.id ORDER BY p.name asc OFFSET 0 FETCH NEXT 10 ROWS ONLY";
+	System.err.println(SQL_4.toString());
+
+	rs2=stmt2.executeQuery(SQL_4.toString());
+	if(!rs2.next()){
+		System.out.println("MUST DO FAT QUERY");
+		SQL_5="SELECT p.id, p.name, coalesce(Sum(total), 0) FROM products p LEFT OUTER JOIN " +
+			  "("+SQL_4+") " +
+			  "as x ON x.id = p.id GROUP BY p.id ORDER BY p.name asc OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY";
+		System.err.println(SQL_5.toString());
+		Zeroes = true;
+	}
+	else{
+
+	// PRODUCTS with  filters 
+
+	// SELECT
+		SQL_1.append("SELECT p.id, p.name, SUM(s.quantity*s.price) ");
+
+	// FROM
+		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
 
 
-// PRODUCTS with  filters 
+		// if age or state filtering on
+		if (ageFilter || stateFilter) 
+			SQL_1.append("INNER JOIN users u ON u.id = s.uid ");
 
-// SELECT
-	SQL_1.append("SELECT p.id, p.name, coalesce(Sum(total), 0) FROM products p LEFT OUTER JOIN (SELECT p.id, p.name, SUM(s.quantity*s.price) as total ");
+		// if age filtering is on
+		if (ageFilter)
+			SQL_1.append("AND u.age BETWEEN "+ age +" ");
 
-// FROM
-	SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
-		
-	// if category filtering on
-	if (categoryFilter)
-		SQL_1.append("INNER JOIN categories c ON c.id = p.cid AND c.name = '"+category+"' ");
-	
-	// if age or state filtering on
-	if (ageFilter || stateFilter) 
-		SQL_1.append("INNER JOIN users u ON u.id = s.uid ");
-		
-	// if age filtering is on
-	if (ageFilter)
-		SQL_1.append("AND u.age BETWEEN "+ age +" ");
-	
-	// if state filtering is on
-	if (stateFilter)
-		SQL_1.append("AND u.state = '"+ state + "' ");
+		// if state filtering is on
+		if (stateFilter)
+			SQL_1.append("AND u.state = '"+ state + "' ");
 
-// GROUP BY
-	SQL_1.append("GROUP BY p.name, p.id ");
+	// GROUP BY
+		SQL_1.append("GROUP BY p.name, p.id ");
 
 
-// ORDER BY
-	SQL_1.append("ORDER BY p.name asc ");
+	// ORDER BY
+		SQL_1.append("ORDER BY p.name asc ");
 
-// PAGINATION
-	SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY) as x ON x.id = p.id GROUP BY p.id ORDER BY p.name");
+	// PAGINATION
+		SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY");
 
-System.err.println("SQL 1 " + SQL_1.toString());
+	System.err.println("SQL 1 " + SQL_1.toString());
 
+	}
+}
+else{
+	// PRODUCTS with  filters 
+
+	// SELECT
+		SQL_1.append("SELECT p.id, p.name, SUM(s.quantity*s.price) ");
+
+	// FROM
+		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
+
+		// if age or state filtering on
+		if (ageFilter || stateFilter) 
+			SQL_1.append("INNER JOIN users u ON u.id = s.uid ");
+
+		// if age filtering is on
+		if (ageFilter)
+			SQL_1.append("AND u.age BETWEEN "+ age +" ");
+
+		// if state filtering is on
+		if (stateFilter)
+			SQL_1.append("AND u.state = '"+ state + "' AND u.id = s.uid ");
+
+		// if category filtering on
+		if (categoryFilter)
+			SQL_1.append("WHERE p.cid = '"+category+"' ");
+
+
+	// GROUP BY
+		SQL_1.append("GROUP BY p.name, p.id ");
+
+
+	// ORDER BY
+		SQL_1.append("ORDER BY p.name asc ");
+
+	// PAGINATION
+		SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY");
+
+	System.err.println(SQL_1.toString());
+
+}
 
 boolean stateRow = true;
 String rowDD = request.getParameter("rowDD"); 
@@ -238,15 +293,15 @@ if (rowDD.equals("States") && rowDD != null)
 
 	// FROM
 		SQL_2.append("FROM users u LEFT OUTER JOIN sales s ON u.id = s.uid ");
-			
+
 		// if category filtering on
 		if (categoryFilter)
-		//	SQL_2.append(", products INNER JOIN categories c ON c.id = products.cid AND c.name = '"+category+"' ");
-			SQL_2.append("LEFT OUTER JOIN products ON s.pid = p.id AND p.cid = "+category);
+			SQL_2.append("LEFT OUTER JOIN products p ON s.pid = p.id WHERE p.cid = "+category + " ");
+
 		// if age filtering is on
 		if (ageFilter)
 			SQL_2.append("AND u.age BETWEEN "+ age +" ");
-		
+
 		// if state filtering is on
 		if (stateFilter)
 			SQL_2.append("AND u.state = '"+ state + "' ");
@@ -254,25 +309,55 @@ if (rowDD.equals("States") && rowDD != null)
 	// GROUP BY
 		SQL_2.append("GROUP BY u.state ");
 
-
 	// ORDER BY
 		SQL_2.append("ORDER BY u.state asc ");
 
 	// PAGINATION
-		SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 10 ROWS ONLY");
-	
-	    
-	System.err.println("SQL 2: " + SQL_2.toString());
+		SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 20 ROWS ONLY");
+	System.err.println("SQL 2: ");
+	System.err.println(SQL_2.toString());
 }
 
 // if customers was chosen as the row value 
 else if (rowDD.equals("Customers") && rowDD != null)
 {
+	// SELECT
+	SQL_2.append("SELECT u.name, SUM(s.quantity*s.price) ");
 
+	// FROM
+	SQL_2.append("FROM users u LEFT OUTER JOIN sales s ON u.id = s.uid ");
+
+	// if category filtering on
+	if (categoryFilter)
+		SQL_2.append("LEFT OUTER JOIN products p ON s.pid = p.id WHERE p.cid = "+category + " ");
+
+	// if age filtering is on
+	if (ageFilter)
+		SQL_2.append("AND u.age BETWEEN "+ age +" ");
+
+	// if state filtering is on
+	if (stateFilter)
+		SQL_2.append("AND u.state = '"+ state + "' ");
+
+	// GROUP BY
+	SQL_2.append("GROUP BY u.name ");
+
+	// ORDER BY
+	SQL_2.append("ORDER BY u.name asc ");
+
+	// PAGINATION
+	SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 20 ROWS ONLY");
+
+	System.err.println("SQL 2: ");
+	System.err.println(SQL_2.toString());
 }
 
-
+if (Zeroes){
+	rs=stmt.executeQuery(SQL_5);
+}
+else{
 rs=stmt.executeQuery(SQL_1.toString());
+}
 int product_id=0;
 String product_name = null;
 float product_price = 0;
@@ -318,42 +403,29 @@ if (stateRow){
 		customerlist.add(customer);
 		System.out.println("IN THE IF RS2");
 	}
+
+}
+else{
+	while(rs2.next())
+	{
+		Customer customer =new Customer();
+		customer.setName(rs2.getString(2));
+		customer.setPrice(rs2.getFloat(3));
+		customer.setId(rs2.getInt(1));
+		customerlist.add(customer);
+		System.out.println("IN THE ELSE RS2");
+	}
+}
 	for(int i=0;i<customerlist.size();i++)
 	{
 		customer_name	=	customerlist.get(i).getName();
 		customer_price	=	customerlist.get(i).getPrice();
 		%><tr><td><%= customer_name %><br><%=customer_price %> </td></tr><% 
-	
+
 	}
 }
-else{
-	/*while(rs2.next())
-	{
-		customer_id = rs2.getInt(1);
-		customer_name=rs2.getString(2);
-		customer_price=rs2.getFloat(3);
-		Customer customer =new Customer();
-		customer.setName(customer_name);
-		customer.setPrice(customer_price);
-		customer.setId(customer_id);
-		customerlist.add(customer);
-		System.out.println("IN THE ELSE RS2");
-	}
 
-	for(int i=0;i<customerlist.size();i++)
-	{
-		customer_name	=	customerlist.get(i).getName();
-		customer_price	=	customerlist.get(i).getPrice();*/
-				//FOR EVERY ROW, BUILD THE INNER DATA USING COMBINATION OF CUSTOMER NAME AND THE PRODUCT NAME
-				// DO SUM QUERY 
-				//"SELECT SUM(sales.price*sales.quantity) FROM users, sales, products"+
-				//"WHERE "
-	//}
-}
- 
-}
 
-		
 catch(Exception e)
 {
 	out.println("<font color='#ff0000'>Error.<br><a href=\"login.jsp\" target=\"_self\"><i>Go Back to Home Page.</i></a></font><br>");
