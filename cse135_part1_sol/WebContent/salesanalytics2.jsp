@@ -60,6 +60,7 @@ Statement stmt;
 Statement stmt2;
 ResultSet rs=null;
 ResultSet rs2=null; 
+ResultSet temptest = null;
 
 ResultSet categories=null;
 String SQL=null;
@@ -289,7 +290,7 @@ String rowDD = request.getParameter("rowDD");
 if (rowDD.equals("States") && rowDD != null)
 {
 	// SELECT
-		SQL_2.append("SELECT u.state, SUM(s.quantity*s.price) ");
+		SQL_2.append("CREATE temporary table sql2result as (SELECT u.state, SUM(s.quantity*s.price)");
 
 	// FROM
 		SQL_2.append("FROM users u LEFT OUTER JOIN sales s ON u.id = s.uid ");
@@ -313,11 +314,10 @@ if (rowDD.equals("States") && rowDD != null)
 		SQL_2.append("ORDER BY u.state asc ");
 
 	// PAGINATION
-		SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 20 ROWS ONLY");
+		SQL_2.append("OFFSET " + offsetvar2 + " FETCH NEXT 20 ROWS ONLY)");
 	System.err.println("SQL 2: ");
 	System.err.println(SQL_2.toString());
 }
-
 // if customers was chosen as the row value 
 else if (rowDD.equals("Customers") && rowDD != null)
 {
@@ -358,6 +358,9 @@ if (Zeroes){
 else{
 rs=stmt.executeQuery(SQL_1.toString());
 }
+
+
+
 int product_id=0;
 String product_name = null;
 float product_price = 0;
@@ -390,6 +393,16 @@ for(int i=0;i<productlist.size();i++)
 
 rs2=stmt2.executeQuery(SQL_2.toString());
 System.out.println("rs2 query");
+String sql = "SELECT * from sql2result";
+temptest = stmt.executeQuery(sql);
+out.println("hellooooo");
+while (temptest.next())
+{
+	%><table><tr><td><%= temptest.getInt(1) %><br><%=temptest.getString(2) %><br> <%= temptest.getFloat(3) %></td></tr></table><% 
+		
+	
+}
+
 String customer_name=null;
 float customer_price=0;
 int customer_id =0;
