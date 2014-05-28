@@ -192,59 +192,59 @@ boolean stateFilter = (!state.equals("All") && state != null);
 boolean Zeroes = false;
 
 if (stateFilter){
-SQL_4="SELECT p.id, p.name, SUM(s.quantity*s.price) as total " +
-"FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid INNER JOIN users u ON u.id = s.uid AND u.state ='" + state + "'AND u.id = s.uid " +
-"GROUP BY p.name, p.id ORDER BY p.name asc OFFSET 0 FETCH NEXT 10 ROWS ONLY";
-System.err.println(SQL_4.toString());
-
-rs2=stmt2.executeQuery(SQL_4.toString());
-if(!rs2.next()){
-	System.out.println("MUST DO FAT QUERY");
-	SQL_5="SELECT p.id, p.name, coalesce(Sum(total), 0) FROM products p LEFT OUTER JOIN " +
-		  "("+SQL_4+") " +
-		  "as x ON x.id = p.id GROUP BY p.id ORDER BY p.name asc OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY";
-	System.err.println(SQL_5.toString());
-	Zeroes = true;
-}
-else{
-
-// PRODUCTS with  filters 
-
-// SELECT
-	SQL_1.append("SELECT p.id, p.name, SUM(s.quantity*s.price) ");
-
-// FROM
-	SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
-		
-	// if category filtering on
-	if (categoryFilter)
-		SQL_1.append("INNER JOIN categories c ON c.id = p.cid AND c.name = '"+category+"' ");
+	SQL_4="SELECT p.id, p.name, SUM(s.quantity*s.price) as total " +
+	"FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid INNER JOIN users u ON u.id = s.uid AND u.state ='" + state + "'AND u.id = s.uid " +
+	"GROUP BY p.name, p.id ORDER BY p.name asc OFFSET 0 FETCH NEXT 10 ROWS ONLY";
+	System.err.println(SQL_4.toString());
 	
-	// if age or state filtering on
-	if (ageFilter || stateFilter) 
-		SQL_1.append("INNER JOIN users u ON u.id = s.uid ");
-		
-	// if age filtering is on
-	if (ageFilter)
-		SQL_1.append("AND u.age BETWEEN "+ age +" ");
+	rs2=stmt2.executeQuery(SQL_4.toString());
+	if(!rs2.next()){
+		System.out.println("MUST DO FAT QUERY");
+		SQL_5="SELECT p.id, p.name, coalesce(Sum(total), 0) FROM products p LEFT OUTER JOIN " +
+			  "("+SQL_4+") " +
+			  "as x ON x.id = p.id GROUP BY p.id ORDER BY p.name asc OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY";
+		System.err.println(SQL_5.toString());
+		Zeroes = true;
+	}
+	else{
 	
-	// if state filtering is on
-	if (stateFilter)
-		SQL_1.append("AND u.state = '"+ state + "' ");
-
-// GROUP BY
-	SQL_1.append("GROUP BY p.name, p.id ");
-
-
-// ORDER BY
-	SQL_1.append("ORDER BY p.name asc ");
-
-// PAGINATION
-	SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY");
-
-System.err.println("SQL 1 " + SQL_1.toString());
-
-}
+	// PRODUCTS with  filters 
+	
+	// SELECT
+		SQL_1.append("SELECT p.id, p.name, SUM(s.quantity*s.price) ");
+	
+	// FROM
+		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
+			
+		// if category filtering on
+		if (categoryFilter)
+			SQL_1.append("INNER JOIN categories c ON c.id = p.cid AND c.name = '"+category+"' ");
+		
+		// if age or state filtering on
+		if (ageFilter || stateFilter) 
+			SQL_1.append("INNER JOIN users u ON u.id = s.uid ");
+			
+		// if age filtering is on
+		if (ageFilter)
+			SQL_1.append("AND u.age BETWEEN "+ age +" ");
+		
+		// if state filtering is on
+		if (stateFilter)
+			SQL_1.append("AND u.state = '"+ state + "' ");
+	
+	// GROUP BY
+		SQL_1.append("GROUP BY p.name, p.id ");
+	
+	
+	// ORDER BY
+		SQL_1.append("ORDER BY p.name asc ");
+	
+	// PAGINATION
+		SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY");
+	
+	System.err.println("SQL 1 " + SQL_1.toString());
+	
+	}
 }
 else{
 	// PRODUCTS with  filters 
