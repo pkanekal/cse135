@@ -413,3 +413,11 @@
 	%>
 </body>
 </html>
+SELECT p.id, p.name, coalesce(Sum(total), 0) 
+FROM products p LEFT OUTER JOIN 
+(SELECT p.id, p.name, SUM(s.quantity*s.price) as total
+FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid INNER JOIN users u ON u.id = s.uid AND u.state = 'West Virginia' 
+GROUP BY p.name, p.id ORDER BY p.name asc OFFSET 0 FETCH NEXT 10 ROWS ONLY) as x 
+ON x.id = p.id
+group by p.id
+order by p.name
