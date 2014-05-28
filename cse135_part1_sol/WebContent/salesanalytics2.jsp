@@ -60,7 +60,6 @@ Statement stmt;
 Statement stmt2;
 ResultSet rs=null;
 ResultSet rs2=null; 
-
 Statement stmt3;
 ResultSet stateSet = null;
 
@@ -237,6 +236,7 @@ if (rowDD.equals("States") && rowDD != null)
 	System.err.println("SQL 2: ");
 	System.err.println(SQL_2.toString());
 }
+
 // if customers was chosen as the row value 
 else if (rowDD.equals("Customers") && rowDD != null)
 {
@@ -280,9 +280,6 @@ else{
 	rs=stmt4.executeQuery("SELECT id, name, coalesce(sum,0) FROM tempproducts");
 	System.err.println("FLSKDJF");
 }
-
-
-
 int product_id=0;
 String product_name = null;
 float product_price = 0;
@@ -316,7 +313,6 @@ for(int i=0;i<productlist.size();i++)
 stmt2.execute(SQL_2.toString());
 
 System.out.println("rs2 query");
-
 String customer_name=null;
 float customer_price=0;
 int customer_id =0;
