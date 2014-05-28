@@ -175,7 +175,7 @@ boolean Zeroes = false;
 			
 		// if age or state filtering on
 		if (ageFilter || stateFilter) 
-			SQL_1.append("INNER JOIN users u ON u.id = s.uid ");
+			SQL_1.append("LEFT OUTER JOIN users u ON u.id = s.uid ");
 			
 		// if age filtering is on
 		if (ageFilter)
