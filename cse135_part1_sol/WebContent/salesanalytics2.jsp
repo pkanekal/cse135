@@ -212,18 +212,23 @@ if (rowDD.equals("States") && rowDD != null)
 
 	// FROM
 		SQL_2.append("FROM users u LEFT OUTER JOIN sales s ON u.id = s.uid ");
-			
+		
+		// if age filtering is on
+		if (ageFilter && stateFilter)
+		{
+			SQL_2.append("INNER JOIN state t on u.age BETWEEN "+ age +" ");
+			SQL_2.append("AND u.state = '"+ state + "' ");
+		}
+		// if only state filtering is on
+		if (stateFilter && !ageFilter)
+			SQL_2.append("INNER JOIN state t on u.state = '"+ state + "' ");
+		// if only age filtering is on
+		if (!stateFilter && ageFilter)
+			SQL_2.append("INNER JOIN state t on u.age BETWEEN "+ age +" ");
 		// if category filtering on
 		if (categoryFilter)
 			SQL_2.append("LEFT OUTER JOIN products p ON s.pid = p.id WHERE p.cid = "+category + " ");
 
-		// if age filtering is on
-		if (ageFilter)
-			SQL_2.append("AND u.age BETWEEN "+ age +" ");
-		
-		// if state filtering is on
-		if (stateFilter)
-			SQL_2.append("AND u.state = '"+ state + "' ");
 
 	// GROUP BY
 		SQL_2.append("GROUP BY u.state ");
