@@ -368,7 +368,7 @@ for(int i=0;i<productlist.size();i++)
 	product_id			=   productlist.get(i).getId();
 	product_name	    =	productlist.get(i).getName();
 	product_price	    =	productlist.get(i).getPrice();
-	%><td><%= product_name %><br><%=product_price %> </td><% 
+	%><td><b><%=product_name %></b><br><%=product_price %> </td><% 
 }
 %></tr>
 <% 
