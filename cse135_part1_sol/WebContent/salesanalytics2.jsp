@@ -434,11 +434,9 @@ if (request.getParameter("rowDD").equals("States")){
 	}
 }
 else{
-<<<<<<< HEAD
-=======
+
 	System.out.println("IN THE ELSE RS2");
 // if (!category)
->>>>>>> c8f74dc5191efb142d4cc0d4738746dbad814862
 	rs2=stmt2.executeQuery("SELECT * FROM tempCustomers");
 	ResultSet innerTable = stmt.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
 			+ "FROM sales s RIGHT OUTER JOIN (SELECT tempProducts.id AS pid, tempProducts.name, "
