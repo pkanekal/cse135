@@ -313,7 +313,7 @@ ResultSet productsQuery;
 // Products query assuming no filters on
 String noFilterProducts = "CREATE TEMPORARY TABLE tempProductsNoFilter AS (SELECT p.id, p.name, SUM(s.quantity*s.price) "
 		+ "FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid GROUP BY p.name, p.id ORDER BY "
-		+ "p.name asc OFFSET 0 FETCH NEXT 10 ROWS ONLY)";
+		+ "p.name asc OFFSET "+offsetvar+" FETCH NEXT 10 ROWS ONLY)";
 
 // Query to join tables with no filters and table with filters)
 String joinTTProducts = "SELECT * FROM tempProductsNoFilter t1 LEFT OUTER JOIN tempProducts t2"
