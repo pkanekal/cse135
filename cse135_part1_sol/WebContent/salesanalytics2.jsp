@@ -187,8 +187,7 @@ offsetvar2 = "0";
 		SQL_1.append("CREATE TEMPORARY TABLE tempProducts AS (SELECT p.id AS filteredId, p.name AS filteredName, SUM(s.quantity*s.price) AS filteredSum ");
 
 	// FROM
-		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
-			
+		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");	
 		// if age or state filtering on
 		if (ageFilter || stateFilter) 
 			SQL_1.append("LEFT OUTER JOIN users u ON u.id = s.uid ");
