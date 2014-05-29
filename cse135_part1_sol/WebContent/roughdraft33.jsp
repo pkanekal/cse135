@@ -199,7 +199,7 @@ StringBuilder SQL_2 = new StringBuilder();
 String SQL_3;
 String SQL_4;
 String SQL_5 = null;
-int executeWhich = 0;
+//int executeWhich = 0;
 //if((action.equals("Next10Products"))){
 	//executeWhich = 1;
 //}

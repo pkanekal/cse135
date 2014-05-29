@@ -421,3 +421,9 @@ GROUP BY p.name, p.id ORDER BY p.name asc OFFSET 0 FETCH NEXT 10 ROWS ONLY) as x
 ON x.id = p.id
 group by p.id
 order by p.name
+
+
+SELECT u.name, sum(s.quantity*s.price) as amount from users u, sales s, products p
+WHERE s.uid=u.id and s.pid=p.id AND u.state = 'Arkansas'
+Group by u.name
+ORDER by u.name asc limit 20
