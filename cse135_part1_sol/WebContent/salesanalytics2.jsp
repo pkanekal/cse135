@@ -252,8 +252,12 @@ if (rowDD.equals("States") && rowDD != null)
 			SQL_2.append("AND u.age BETWEEN "+ age +" ");
 
 		// if state filtering is on
-		if (stateFilter)
-			SQL_2.append("AND u.state = '"+ state + "' ");
+		if (stateFilter) {
+			if (categoryFilter)
+				SQL_2.append("AND u.state = '"+ state + "' ");
+			else
+				SQL_2.append("WHERE u.state = '"+ state + "' ");
+		}
 
 	// GROUP BY
 		SQL_2.append("GROUP BY u.state ");
@@ -367,23 +371,53 @@ for(int i=0;i<productlist.size();i++)
 %></tr>
 <% 
 
-stmt2.execute(SQL_2.toString());
+boolean stateRes = stmt2.execute(SQL_2.toString());
 
-System.err.println("rs2 query");
+System.err.println("rs2 query " + stateRes);
 String customer_name=null;
 float customer_price=0;
 int customer_id =0;
 
 if (request.getParameter("rowDD").equals("States")){
-	System.out.println("IN THE IF RS2");
+	System.err.println("IN THE IF RS2");
+	ResultSet statesQuery;
 
-	rs2=stmt2.executeQuery("SELECT * FROM tempStates");
+	// states query assuming no filters on
+	if (!stateFilter) {
+		String noFilterStates = "CREATE TEMPORARY TABLE tempStatesNoFilter AS (SELECT u.state, SUM(s.quantity*s.price) FROM users u LEFT "
+				+"OUTER JOIN sales s ON u.id = s.uid GROUP BY u.state ORDER BY u.state asc OFFSET "+offsetvar2+" FETCH NEXT 20 ROWS ONLY)";
+	
+		// Query to join tables with no filters and table with filters)
+		String joinTTStates = "SELECT * FROM tempStatesNoFilter t1 LEFT OUTER JOIN tempStates t2 ON t1.state = t2.state";
+		stmt2.execute(noFilterStates);
+		rs2=stmt2.executeQuery(joinTTStates);
+		System.err.println(noFilterStates);
+		System.err.println(joinTTStates);
+	}
+	else {
+		rs2 = stmt2.executeQuery("SELECT * FROM tempStates");
+		ResultSet tmp = stmt3.executeQuery("SELECT * FROM tempStates");
+
+		if (!tmp.next()) {
+			System.err.println("no states");
+			Customer customer =new Customer();
+			customer.setName(state);
+			customer.setPrice(0);
+			customerlist.add(customer);
+
+		}
+		System.err.println("select * from tempstates");
+	}
 
 	while(rs2.next())
 	{
 		Customer customer =new Customer();
 		customer.setName(rs2.getString(1));
-		customer.setPrice(rs2.getFloat(2));
+		if (!stateFilter)
+			customer.setPrice(rs2.getFloat(4));
+		else
+			customer.setPrice(rs2.getFloat(2));
+
 		customerlist.add(customer);
 	}
 
@@ -398,7 +432,7 @@ if (request.getParameter("rowDD").equals("States")){
 }
 else{
 	System.out.println("IN THE ELSE RS2");
-
+// if (!category)
 	rs2=stmt2.executeQuery("SELECT * FROM tempCustomers");
 	ResultSet innerTable = stmt.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
 			+ "FROM sales s RIGHT OUTER JOIN (SELECT tempProducts.filteredId AS pid, tempProducts.filteredName, "
@@ -437,8 +471,7 @@ if (rowDD.equals("States")) {
 } else {
 buttonVal = "Next 20 Customers";
 }
-System.out.println(request.getParameter("offsetvar"));
-System.out.println("HIHIHI");
+
 if (sizeOfList < 20){
 	System.out.println("LESS THAN 20 CST");
 	System.out.println(customerlist.size());
