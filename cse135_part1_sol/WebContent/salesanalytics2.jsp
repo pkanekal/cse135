@@ -56,15 +56,11 @@ ArrayList<Customer> customerlist= new ArrayList<Customer>();
 ArrayList<Product> productlist = new ArrayList<Product>();
 
 Connection conn=null;
-Statement stmt;
-Statement stmt2;
 ResultSet rs=null;
 ResultSet rs2=null; 
-Statement stmt3;
 ResultSet stateSet = null;
-
 ResultSet categories=null;
-String SQL=null;
+
 // one offset variable for products, the other for the actual rows (either customers or states)
 int offsetvar = 0;	
 int offsetvar2 = 0;
@@ -76,9 +72,9 @@ try
 	String user="postgres";
 	String password="postgres";
 	conn =DriverManager.getConnection(url, user, password);
-	stmt =conn.createStatement();
-	stmt2 =conn.createStatement();
-	stmt3 =conn.createStatement();
+	Statement stmt =conn.createStatement();
+	Statement stmt2 =conn.createStatement();
+	Statement stmt3 =conn.createStatement();
 	Statement stmt4 = conn.createStatement();
 	// save the values of the filters
 	String state = request.getParameter("state");
@@ -168,7 +164,7 @@ boolean Zeroes = false;
 
 	// PRODUCTS with  filters 
 	// SELECT
-		SQL_1.append("CREATE TEMPORARY TABLE tempProducts AS (SELECT p.id, p.name, SUM(s.quantity*s.price) ");
+		SQL_1.append("CREATE TEMPORARY TABLE tempProducts AS (SELECT p.id AS filteredId, p.name AS filteredName, SUM(s.quantity*s.price) AS filteredSum ");
 
 	// FROM
 		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");
@@ -176,29 +172,44 @@ boolean Zeroes = false;
 		// if age or state filtering on
 		if (ageFilter || stateFilter) 
 			SQL_1.append("LEFT OUTER JOIN users u ON u.id = s.uid ");
-			
+		
+		boolean and = false;
 		// if age filtering is on
-		if (ageFilter)
-			SQL_1.append("AND u.age BETWEEN "+ age +" ");
-		
+		if (ageFilter) {
+				SQL_1.append("WHERE u.age BETWEEN "+ age +" ");
+				and = true;
+		}
 		// if state filtering is on
-		if (stateFilter)
-			SQL_1.append("AND u.state = '"+ state + "' AND u.id = s.uid ");
-		
+		if (stateFilter) {
+			if (and) {
+				SQL_1.append("AND u.state = '"+ state +"' ");
+			}
+			else {
+				SQL_1.append("WHERE u.state = '"+ state + "' ");
+				and = true;
+			}
+		}
 		// if category filtering on
-		if (categoryFilter)
-			SQL_1.append("WHERE p.cid = '"+category+"' ");
-				
+		if (categoryFilter) {
+			if (and) {
+				SQL_1.append("AND p.cid = '"+ category + "' ");
+			}
+			else {
+				SQL_1.append("WHERE p.cid = '"+category+"' ");
+				and = true;
+			}
+		}
 
 	// GROUP BY
 		SQL_1.append("GROUP BY p.name, p.id ");
-
 
 	// ORDER BY
 		SQL_1.append("ORDER BY p.name asc ");
 
 	// PAGINATION
 		SQL_1.append("OFFSET " + offsetvar + " FETCH NEXT 10 ROWS ONLY)");
+	
+
 	System.err.println("SQL 1: ");
 	System.err.println(SQL_1.toString());
 	System.err.println();
@@ -275,25 +286,52 @@ else if (rowDD.equals("Customers") && rowDD != null)
 	System.err.println("SQL 2: ");
 	System.err.println(SQL_2.toString());
 }
-if (Zeroes){
-	rs=stmt.executeQuery(SQL_5);
-	System.err.println("executing sql 5...");
-}
-else{
-	System.err.println("selecting tempProducts");
+
 	stmt.execute(SQL_1.toString());
-	rs=stmt4.executeQuery("SELECT id, name, coalesce(sum,0) FROM tempproducts");
-	System.err.println("FLSKDJF");
-}
+	
 int product_id=0;
 String product_name = null;
 float product_price = 0;
 
-while (rs.next()){
+// execute base query with no filters to join if result set is null
+ResultSet productsQuery;
+
+// Products query assuming no filters on
+String noFilterProducts = "CREATE TEMPORARY TABLE tempProductsNoFilter AS (SELECT p.id, p.name, SUM(s.quantity*s.price) "
+		+ "FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid GROUP BY p.name, p.id ORDER BY "
+		+ "p.name asc OFFSET 0 FETCH NEXT 10 ROWS ONLY)";
+
+// Query to join tables with no filters and table with filters)
+String joinTTProducts = "SELECT * FROM tempProductsNoFilter t1 LEFT OUTER JOIN tempProducts t2"
+		+ " ON t1.id = t2.filteredId";
+
+if (!categoryFilter) {
+
+	// DEBUG
+	System.err.println(noFilterProducts);
+	System.err.println(joinTTProducts);
+	
+	stmt.execute(noFilterProducts);
+	productsQuery = stmt3.executeQuery(joinTTProducts);
+}
+else { // category filter on so cut down result set (no zero logic)
+
+		productsQuery = stmt3.executeQuery("SELECT * FROM tempProducts");
+		System.err.println("selecting tempProducts");
+}
+System.err.println("reached withZeroes query");
+
+while (productsQuery.next()){
+	
 	Product product = new Product();
-	product.setId(rs.getInt(1));
-	product.setName(rs.getString(2));
-	product.setPrice(rs.getFloat(3));
+	product.setId(productsQuery.getInt(1));
+	product.setName(productsQuery.getString(2));
+	
+	if (!categoryFilter) // if join was made sum is in a different column
+		product.setPrice(productsQuery.getFloat(6));
+	else
+		product.setPrice(productsQuery.getFloat(3));
+
 	productlist.add(product);
 }
 %>
@@ -317,7 +355,7 @@ for(int i=0;i<productlist.size();i++)
 
 stmt2.execute(SQL_2.toString());
 
-System.out.println("rs2 query");
+System.err.println("rs2 query");
 String customer_name=null;
 float customer_price=0;
 int customer_id =0;
@@ -345,14 +383,15 @@ if (request.getParameter("rowDD").equals("States")){
 	}
 }
 else{
+	System.out.println("IN THE ELSE RS2");
+
 	rs2=stmt2.executeQuery("SELECT * FROM tempCustomers");
 	ResultSet innerTable = stmt.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
-			+ "FROM sales s RIGHT OUTER JOIN (SELECT tempProducts.id AS pid, tempProducts.name, "
-			+ "tempProducts.sum, tempCustomers.id, tempCustomers.id AS cid, tempCustomers.name, "
+			+ "FROM sales s RIGHT OUTER JOIN (SELECT tempProducts.filteredId AS pid, tempProducts.filteredName, "
+			+ "tempProducts.filteredSum, tempCustomers.id, tempCustomers.id AS cid, tempCustomers.name, "
 			+ "tempCustomers.sum FROM tempProducts, tempCustomers) AS y ON s.uid= y.cid AND s.pid= y.pid;");
 	while(rs2.next())
 	{
-		System.out.println("IN THE ELSE RS2");
 		Customer customer =new Customer();
 		customer.setName(rs2.getString(2));
 		customer.setPrice(rs2.getFloat(3));
