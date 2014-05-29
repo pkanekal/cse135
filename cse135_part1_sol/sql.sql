@@ -38,9 +38,6 @@ CREATE TABLE IF NOT EXISTS state (
     name    TEXT UNIQUE NOT NULL
 );
 
-CREATE INDEX userIndex ON sales.uid;
-CREATE INDEX productIndex ON sales.pid;
-
 INSERT INTO state(name)
 VALUES
 ('Alabama'),
