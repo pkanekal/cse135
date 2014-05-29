@@ -305,7 +305,7 @@ else if (rowDD.equals("Customers") && rowDD != null)
 	System.err.println(SQL_2.toString());
 }
 
-	stmt.execute(SQL_1.toString());
+stmt.execute(SQL_1.toString());
 	
 int product_id=0;
 String product_name = null;
@@ -432,7 +432,7 @@ if (request.getParameter("rowDD").equals("States")){
 }
 else{
 	System.out.println("IN THE ELSE RS2");
-// if (!category)
+
 	rs2=stmt2.executeQuery("SELECT * FROM tempCustomers");
 	ResultSet innerTable = stmt.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
 			+ "FROM sales s RIGHT OUTER JOIN (SELECT tempProducts.filteredId AS pid, tempProducts.filteredName, "
