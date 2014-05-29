@@ -69,8 +69,6 @@ String disabled = "";
 // one offset variable for products, the other for the actual rows (either customers or states)
 String offsetvar = "";	
 String offsetvar2 = "";
-String nextProduct = request.getParameter("Next 10 Products");
-String nextRow = request.getParameter("Next 20 Rows");
 try
 {
 	// Connection code
@@ -97,22 +95,16 @@ try
 	<div style="width:20%; position:absolute; top:50px; left:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 	<form action="salesanalytics2.jsp" method="post">
 		<b>Row Drop Down:</b>
-		<% if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null){ %>
 		<select name="rowDD">
-		<%}else{ %>
-		<select disabled name="rowDD"><%} %>
 			<option value="Customers" <% if (rowDD.equals("Customers")) out.println("selected"); %>>Customers</option>
 			<option value="States" <% if (rowDD.equals("States")) out.println("selected"); %>>Customer States</option>
 		</select>
-	  <% if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null){ %>
-		<input type="submit" value="Run Query"><%} else { %> <input type="submit" disabled value="Run Query"> <%} %>
+		<input type="submit" value="Run Query">
 		<br>
 		<p> </p><b>Filters:</b>
 		<div id="filter">
 			State: 
-			<% if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null){ %>
 			<select name="state">
-			<% }else {%> <select disabled name="state"> <%} %>
 				<%
 				stateSet = stmt3.executeQuery("SELECT * FROM state order by id asc");
 				out.println("<option value=\"All\"> All </option> ");
@@ -128,9 +120,7 @@ try
 			</select>
 			<br>
 			Category:
-			<% if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null){ %>
 			<select name="category">
-			<% }else {%> <select disabled name="category"> <%} %>
 				<option value="All">All</option>
 
 				<% // Populate category options
@@ -151,19 +141,26 @@ try
 			</select>
 			<br>
 			Age:
-				
-			<% 
-			if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null)
-			{ %>
-			<select name="age"> <% }
-			else{ %>
-			<select disabled name="age"> <%} %>
+			(if offsetvar.equals(null) && offsetvar2.equals(null))
+			{
+			<select name="age">
 				<option value="All" <% if (age.equals("All")) out.println("selected"); %>>All</option>
 				<option value= "12 AND 18" <% if (age.equals("12 AND 18")) out.println("selected"); %>>12-18</option>
 				<option value= "18 AND 45" <% if (age.equals("18 AND 45")) out.println("selected"); %>>18-45</option>
 				<option value= "45 AND 65" <% if (age.equals("45 AND 65")) out.println("selected"); %>>45-65</option>
 				<option value= "65 AND 200" <% if (age.equals("65 AND 200")) out.println("selected"); %>>65-</option>
 			</select>
+			}
+			else
+			{
+			<select disabled name="age">
+				<option value="All" <% if (age.equals("All")) out.println("selected"); %>>All</option>
+				<option value= "12 AND 18" <% if (age.equals("12 AND 18")) out.println("selected"); %>>12-18</option>
+				<option value= "18 AND 45" <% if (age.equals("18 AND 45")) out.println("selected"); %>>18-45</option>
+				<option value= "45 AND 65" <% if (age.equals("45 AND 65")) out.println("selected"); %>>45-65</option>
+				<option value= "65 AND 200" <% if (age.equals("65 AND 200")) out.println("selected"); %>>65-</option>
+			</select>
+			}
 		</div>
 	</form>
 </div>
@@ -189,7 +186,8 @@ int sizeOfList = 0;
 	//executeWhich = 2;
 //}
 
-
+String nextProduct = request.getParameter("Next 10 Products");
+String nextRow = request.getParameter("Next 20 Rows");
 
 if (nextProduct != null && nextProduct.equals("Next 10 Products")) {
 	//offsetvar = String.valueOf(Integer.valueOf(request.getParameter("offsetvar"))+10);
@@ -197,30 +195,15 @@ if (nextProduct != null && nextProduct.equals("Next 10 Products")) {
 	System.out.println("ADDED 10");
 	System.out.println(offsetvar);
 }
-else 
-{ System.out.println("NOT ADDING 10");
-	if ((request.getParameter("offsetvar") == null)) {
-		offsetvar = "0";
-		System.out.println("offsetvar initalized");
-	}
-	else{
-	offsetvar = request.getParameter("offsetvar");
-	}
-}
-
-if (nextRow != null && (nextRow.equals("Next 20 Customers") || nextRow.equals("Next 20 States"))) {
+	else { System.out.println("NOT ADDING 10");
+	offsetvar = "0";}
+if (nextRow != null && (nextRow.equals("Next 20 Customers") 
+		|| nextRow.equals("Next 20 States"))) {
 	offsetvar2 = String.valueOf(Integer.parseInt(request.getParameter("offsetvar2"))+20);
 	System.out.println("ADDED 20");
 }
-else 
-{ System.out.println("NOT ADDING 20"); 
-	if ((request.getParameter("offsetvar2") == null)) {
-		offsetvar2 = "0";
-		System.out.println("offsetvar2 initalized");
-	}
-	else{
-		offsetvar2 = request.getParameter("offsetvar2");
-	}
+else { System.out.println("NOT ADDING 20"); 
+offsetvar2 = "0";
 }
 
 
@@ -281,12 +264,8 @@ if (rowDD.equals("States") && rowDD != null)
 			SQL_2.append("AND u.age BETWEEN "+ age +" ");
 
 		// if state filtering is on
-		if (stateFilter) {
-			if (categoryFilter)
-				SQL_2.append("AND u.state = '"+ state + "' ");
-			else
-				SQL_2.append("WHERE u.state = '"+ state + "' ");
-		}
+		if (stateFilter)
+			SQL_2.append("AND u.state = '"+ state + "' ");
 
 	// GROUP BY
 		SQL_2.append("GROUP BY u.state ");
@@ -373,7 +352,7 @@ for(int i=0;i<productlist.size();i++)
 %></tr>
 <% 
 
-boolean stateRes = stmt2.execute(SQL_2.toString());
+stmt2.execute(SQL_2.toString());
 
 System.out.println("rs2 query");
 String customer_name=null;
@@ -381,45 +360,16 @@ float customer_price=0;
 int customer_id =0;
 
 if (request.getParameter("rowDD").equals("States")){
-	System.err.println("IN THE IF RS2");
-	ResultSet statesQuery;
+	System.out.println("IN THE IF RS2");
+	SQL_5 = "CREATE TEMPORARY TABLE tempStateCustomer AS (SELECT u.state, u.id FROM users u where u.state)"
 
-	// states query assuming no filters on
-	if (!stateFilter) {
-		String noFilterStates = "CREATE TEMPORARY TABLE tempStatesNoFilter AS (SELECT u.state, SUM(s.quantity*s.price) FROM users u LEFT "
-				+"OUTER JOIN sales s ON u.id = s.uid GROUP BY u.state ORDER BY u.state asc OFFSET "+offsetvar2+" FETCH NEXT 20 ROWS ONLY)";
-	
-		// Query to join tables with no filters and table with filters)
-		String joinTTStates = "SELECT * FROM tempStatesNoFilter t1 LEFT OUTER JOIN tempStates t2 ON t1.state = t2.state";
-		stmt2.execute(noFilterStates);
-		rs2=stmt2.executeQuery(joinTTStates);
-		System.err.println(noFilterStates);
-		System.err.println(joinTTStates);
-	}
-	else {
-		rs2 = stmt2.executeQuery("SELECT * FROM tempStates");
-		ResultSet tmp = stmt3.executeQuery("SELECT * FROM tempStates");
-
-		if (!tmp.next()) {
-			System.err.println("no states");
-			Customer customer =new Customer();
-			customer.setName(state);
-			customer.setPrice(0);
-			customerlist.add(customer);
-
-		}
-		System.err.println("select * from tempstates");
-	}
-
+	rs2=stmt2.executeQuery("SELECT * FROM tempStates");
+	ResultSet innerTable = stmt.executeQuery("Select coalesce(quantity*price,0) AS sum "
 	while(rs2.next())
 	{
 		Customer customer =new Customer();
 		customer.setName(rs2.getString(1));
-		if (!stateFilter)
-			customer.setPrice(rs2.getFloat(4));
-		else
-			customer.setPrice(rs2.getFloat(2));
-
+		customer.setPrice(rs2.getFloat(2));
 		customerlist.add(customer);
 	}
 
@@ -429,13 +379,15 @@ if (request.getParameter("rowDD").equals("States")){
 		customer_price	=	customerlist.get(i).getPrice();
 		%><tr><td><%= customer_name %><br><%=customer_price %> </td> <%
 
+		for (int j= 0; j < 10; j++) {
+			if (innerTable.next()) 
+			%> <td><%=innerTable.getInt(1) %></td><%
+		}
+		
 		%></tr><% 
 	}
 }
 else{
-
-	System.out.println("IN THE ELSE RS2");
-// if (!category)
 	rs2=stmt2.executeQuery("SELECT * FROM tempCustomers");
 	ResultSet innerTable = stmt.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
 			+ "FROM sales s RIGHT OUTER JOIN (SELECT tempProducts.id AS pid, tempProducts.name, "
@@ -475,14 +427,14 @@ if (rowDD.equals("States")) {
 } else {
 buttonVal = "Next 20 Customers";
 }
-
+System.out.println(request.getParameter("offsetvar"));
 if (sizeOfList < 20){
 	System.out.println("LESS THAN 20 CST");
 	System.out.println(customerlist.size());
 }
 else{
 %>
-<div align="right"><form action="salesanalytics2.jsp" method="get" value="Next20Rows">
+<div align="right"><form action="jeffrey.jsp" method="get" value="Next20Rows">
 	<input type="submit" name="Next 20 Rows" value="<%=buttonVal%>"/>
 	<input type="hidden" name="offsetvar2" value="<%=offsetvar2 %>"/>
 	<input type="hidden" name="offsetvar" value="<%=offsetvar %>"/>
