@@ -62,8 +62,8 @@ ResultSet stateSet = null;
 ResultSet categories=null;
 
 // one offset variable for products, the other for the actual rows (either customers or states)
-int offsetvar = 0;	
-int offsetvar2 = 0;
+String offsetvar = "";	
+String offsetvar2 = "";
 try
 {
 	// Connection code
@@ -161,6 +161,26 @@ boolean ageFilter = (!age.equals("All") && age != null);
 boolean categoryFilter = (!category.equals("All") && category != null) ;
 boolean stateFilter = (!state.equals("All") && state != null);
 boolean Zeroes = false;
+int sizeOfList = 0;
+String nextProduct = request.getParameter("Next 10 Products");
+String nextRow = request.getParameter("Next 20 Rows");
+
+if (nextProduct != null && nextProduct.equals("Next 10 Products")) {
+	//offsetvar = String.valueOf(Integer.valueOf(request.getParameter("offsetvar"))+10);
+	offsetvar = String.valueOf(Integer.parseInt(request.getParameter("offsetvar"))+10);
+	System.out.println("ADDED 10");
+	System.out.println(offsetvar);
+}
+	else { System.out.println("NOT ADDING 10");
+	offsetvar = "0";}
+if (nextRow != null && (nextRow.equals("Next 20 Customers") 
+		|| nextRow.equals("Next 20 States"))) {
+	offsetvar2 = String.valueOf(Integer.parseInt(request.getParameter("offsetvar2"))+20);
+	System.out.println("ADDED 20");
+}
+else { System.out.println("NOT ADDING 20"); 
+offsetvar2 = "0";
+}
 
 	// PRODUCTS with  filters 
 	// SELECT
@@ -387,11 +407,14 @@ else{
 			+ "tempCustomers.sum FROM tempProducts, tempCustomers) AS y ON s.uid= y.cid AND s.pid= y.pid;");
 	while(rs2.next())
 	{
+		sizeOfList += 1;
+		if (rs2.getFloat(3) != 0.0f){
 		Customer customer =new Customer();
 		customer.setName(rs2.getString(2));
 		customer.setPrice(rs2.getFloat(3));
 		customer.setId(rs2.getInt(1));
 		customerlist.add(customer);
+		}
 	}
 	for(int i=0;i<customerlist.size();i++)
 	{
@@ -406,6 +429,51 @@ else{
 		}
 		%></tr><% 
 	}
+}
+
+String buttonVal = "";
+//Decide which button to show based on the rows selection
+if (rowDD.equals("States")) {
+	buttonVal = "Next 20 States";
+} else {
+buttonVal = "Next 20 Customers";
+}
+System.out.println(request.getParameter("offsetvar"));
+System.out.println("HIHIHI");
+if (sizeOfList < 20){
+	System.out.println("LESS THAN 20 CST");
+	System.out.println(customerlist.size());
+}
+else{
+%>
+<div align="right"><form action="salesanalytics2.jsp" method="get" value="Next20Rows">
+	<input type="submit" name="Next 20 Rows" value="<%=buttonVal%>"/>
+	<input type="hidden" name="offsetvar2" value="<%=offsetvar2 %>"/>
+	<input type="hidden" name="offsetvar" value="<%=offsetvar %>"/>
+	<input type ="hidden" name="state" value="<%=state%>">
+	<input type ="hidden" name="category" value="<%=category%>">
+	<input type ="hidden" name="age" value="<%=age%>">
+	<input type ="hidden" name="rowDD" value="<%=rowDD%>">
+	
+</form></div>
+<% } %>
+
+<% if (productlist.size() < 10){
+	System.out.println("LESS THAN 10 PRD");
+}
+else {
+%>
+
+<div align="right"><form action="salesanalytics2.jsp" method="get" value="Next10Products">
+ <input type="submit" name="Next 10 Products" value="Next 10 Products"/>
+ <input type="hidden" name="offsetvar2" value="<%=offsetvar2 %>"/>
+ <input type="hidden" name="offsetvar" value="<%=offsetvar %>"/>
+ <input type ="hidden" name="state" value="<%=state%>">
+	<input type ="hidden" name="category" value="<%=category%>">
+	<input type ="hidden" name="age" value="<%=age%>">
+	<input type ="hidden" name="rowDD" value="<%=rowDD%>">
+</form></div>
+<% 
 }
 
 }
