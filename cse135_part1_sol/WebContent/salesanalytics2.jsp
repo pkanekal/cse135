@@ -43,10 +43,6 @@ class Product
 	public void setId(int id) {	this.id = id;}
 	public String getName() {return name;}
 	public void setName(String name) { this.name = name;}
-	//public void getcid() { return categoryid;}
-	//public void setcid(int cid) {this.categoryid = categoryid; }
-	//public void getsku() { return SKU;}
-	//public void setsku(int sku) {this.sku = sku;}
 	public void setPrice(float price) {this.price = price;}
 	public float getPrice(){return price;}
 }
@@ -220,7 +216,8 @@ else
 
 	// FROM
 		SQL_1.append("FROM products p LEFT OUTER JOIN sales s ON p.id = s.pid ");	
-		// if age or state filtering on
+		
+	// if age or state filtering on
 		if (ageFilter || stateFilter) 
 			SQL_1.append("LEFT OUTER JOIN users u ON u.id = s.uid ");
 		
@@ -369,7 +366,6 @@ else { // category filter on so cut down result set (no zero logic)
 		productsQuery = stmt3.executeQuery("SELECT * FROM tempProducts");
 		System.err.println("selecting tempProducts");
 }
-System.err.println("reached withZeroes query");
 
 while (productsQuery.next()){
 	
@@ -457,7 +453,7 @@ if (request.getParameter("rowDD").equals("States")){
 	stmt.execute(tmpStateID);
 	ResultSet innerTable = stmt2.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
 			+ "FROM sales s RIGHT OUTER JOIN (SELECT * FROM statesID, tempProducts)"
-			+ "AS y ON s.uid = y.filteredId AND s.pid = y.id ");
+			+ "AS y ON s.uid = y.id AND s.pid = y.filteredId ");
 	
 	for(int i=0;i<customerlist.size();i++)
 	{
@@ -483,11 +479,11 @@ else{
 	{
 		sizeOfList += 1;
 		if (rs2.getFloat(3) != 0.0f){
-		Customer customer =new Customer();
-		customer.setName(rs2.getString(2));
-		customer.setPrice(rs2.getFloat(3));
-		customer.setId(rs2.getInt(1));
-		customerlist.add(customer);
+			Customer customer =new Customer();
+			customer.setName(rs2.getString(2));
+			customer.setPrice(rs2.getFloat(3));
+			customer.setId(rs2.getInt(1));
+			customerlist.add(customer);
 		}
 	}
 	for(int i=0;i<customerlist.size();i++)
@@ -513,10 +509,11 @@ if (rowDD.equals("States")) {
 buttonVal = "Next 20 Customers";
 }
 
-if (sizeOfList < 20){
+if (customerlist.size() < 20 && buttonVal == "Next 20 States"){
 	System.out.println("LESS THAN 20 CST");
 	System.out.println(customerlist.size());
 }
+else if (sizeOfList < 20 && buttonVal == "Next 20 Customers"){}
 else{
 %>
 <div align="right"><form action="salesanalytics2.jsp" method="get" value="Next20Rows">
