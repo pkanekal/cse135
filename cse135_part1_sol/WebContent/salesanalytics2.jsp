@@ -87,19 +87,27 @@ try
 		age = "All";
 	%>
 	<!------------------Left Side Panel------------------->
+	<a href="/cse135_part1_sol/salesanalytics2.jsp"> Return to original page</a>
 	<div style="width:20%; position:absolute; top:50px; left:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 	<form action="salesanalytics2.jsp" method="post">
 		<b>Row Drop Down:</b>
-		<select name="rowDD">
+		<% if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null){ %>
+  		<select name="rowDD">
+		<%}else{ %>
+ 		<select disabled name="rowDD"><%} %>
 			<option value="Customers" <% if (rowDD.equals("Customers")) out.println("selected"); %>>Customers</option>
 			<option value="States" <% if (rowDD.equals("States")) out.println("selected"); %>>Customer States</option>
 		</select>
-		<input type="submit" value="Run Query">
+		  <% if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null){ %>
+ 		<input type="submit" value="Run Query"><%} else { %> <input type="submit" disabled value="Run Query"> <%} %>
 		<br>
 		<p> </p><b>Filters:</b>
 		<div id="filter">
-			State: 
+			State:
+			<% if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null){ %> 
 			<select name="state">
+			<% }else {%> <select disabled name="state"> <%} %>
+			
 				<%
 				stateSet = stmt3.executeQuery("SELECT * FROM state order by id asc");
 				out.println("<option value=\"All\"> All </option> ");
@@ -115,7 +123,10 @@ try
 			</select>
 			<br>
 			Category:
+			<% if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null){ %>
 			<select name="category">
+			<% }else {%> <select disabled name="category"> <%} %>
+			
 				<option value="All">All</option>
 				
 				<% // Populate category options
@@ -136,7 +147,13 @@ try
 			</select>
 			<br>
 			Age:
-			<select name="age">
+				<% 
+ 			if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null)
+ 			{ %>
+ 			<select name="age"> <% }
+ 			else{ %>
+ 			<select disabled name="age"> <%} %>
+ 				<option value = "All">All</option>
 				<option value="All" <% if (age.equals("All")) out.println("selected"); %>>All</option>
 				<option value= "12 AND 18" <% if (age.equals("12 AND 18")) out.println("selected"); %>>12-18</option>
 				<option value= "18 AND 45" <% if (age.equals("18 AND 45")) out.println("selected"); %>>18-45</option>
@@ -171,15 +188,30 @@ if (nextProduct != null && nextProduct.equals("Next 10 Products")) {
 	System.out.println("ADDED 10");
 	System.out.println(offsetvar);
 }
-	else { System.out.println("NOT ADDING 10");
-	offsetvar = "0";}
-if (nextRow != null && (nextRow.equals("Next 20 Customers") 
-		|| nextRow.equals("Next 20 States"))) {
+else 
+	{ System.out.println("NOT ADDING 10");
+	 	if ((request.getParameter("offsetvar") == null)) {
+	 		offsetvar = "0";
+	 		System.out.println("offsetvar initalized");
+	 	}
+	 	else{
+	 	offsetvar = request.getParameter("offsetvar");
+	 	}
+	 }
+	 
+	 if (nextRow != null && (nextRow.equals("Next 20 Customers") || nextRow.equals("Next 20 States"))) {
 	offsetvar2 = String.valueOf(Integer.parseInt(request.getParameter("offsetvar2"))+20);
 	System.out.println("ADDED 20");
 }
-else { System.out.println("NOT ADDING 20"); 
-offsetvar2 = "0";
+	 else 
+		 { System.out.println("NOT ADDING 20"); 
+		 	if ((request.getParameter("offsetvar2") == null)) {
+		 		offsetvar2 = "0";
+		 		System.out.println("offsetvar2 initalized");
+		 	}
+		 	else{
+		 		offsetvar2 = request.getParameter("offsetvar2");
+		 	}
 }
 
 	// PRODUCTS with  filters 
@@ -420,13 +452,22 @@ if (request.getParameter("rowDD").equals("States")){
 
 		customerlist.add(customer);
 	}
-
+	String tmpStateID = "CREATE TEMPORARY TABLE statesID as (SELECT users.id,users.state FROM users LEFT OUTER JOIN state s ON s.name = users.state ORDER BY users.state asc OFFSET "+offsetvar2+" FETCH NEXT 20 ROWS ONLY)";
+	System.err.println(tmpStateID);
+	stmt.execute(tmpStateID);
+	ResultSet innerTable = stmt2.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
+			+ "FROM sales s RIGHT OUTER JOIN (SELECT * FROM statesID, tempProducts)"
+			+ "AS y ON s.uid = y.filteredId AND s.pid = y.id ");
+	
 	for(int i=0;i<customerlist.size();i++)
 	{
 		customer_name	=	customerlist.get(i).getName();
 		customer_price	=	customerlist.get(i).getPrice();
 		%><tr><td><%= customer_name %><br><%=customer_price %> </td> <%
-
+			for (int j= 0; j < 10; j++) {
+				if (innerTable.next()) 
+				%> <td><%=innerTable.getInt(1) %></td><%
+			}
 		%></tr><% 
 	}
 }
