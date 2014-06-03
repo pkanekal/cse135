@@ -352,6 +352,8 @@ String noFilterProducts = "CREATE TEMPORARY TABLE tempProductsNoFilter AS (SELEC
 String joinTTProducts = "SELECT * FROM tempProductsNoFilter t1 LEFT OUTER JOIN tempProducts t2"
 		+ " ON t1.id = t2.filteredId";
 
+//if no category filter, then you are going to not cut down, 
+//cobine both
 if (!categoryFilter) {
 
 	// DEBUG
@@ -389,6 +391,7 @@ while (productsQuery.next()){
 		%> <td>State</td> <% } %>
 
 <%	
+//generate the header
 for(int i=0;i<productlist.size();i++)
 {
 	product_id			=   productlist.get(i).getId();
@@ -422,7 +425,7 @@ if (request.getParameter("rowDD").equals("States")){
 		System.err.println(noFilterStates);
 		System.err.println(joinTTStates);
 	}
-	else {
+	else { // states query with state filter on
 		rs2 = stmt2.executeQuery("SELECT * FROM tempStates");
 		ResultSet tmp = stmt3.executeQuery("SELECT * FROM tempStates");
 
@@ -437,7 +440,7 @@ if (request.getParameter("rowDD").equals("States")){
 		System.err.println("select * from tempstates");
 	}
 
-	while(rs2.next())
+	while(rs2.next()) // populate states column
 	{
 		Customer customer =new Customer();
 		customer.setName(rs2.getString(1));
@@ -448,13 +451,20 @@ if (request.getParameter("rowDD").equals("States")){
 
 		customerlist.add(customer);
 	}
+	
+	// INNER STATES TABLE QUERY
+	
+	// create table of all userID's and corresponding states
 	String tmpStateID = "CREATE TEMPORARY TABLE statesID as (SELECT users.id,users.state FROM users LEFT OUTER JOIN state s ON s.name = users.state ORDER BY users.state asc OFFSET "+offsetvar2+" FETCH NEXT 20 ROWS ONLY)";
 	System.err.println(tmpStateID);
 	stmt.execute(tmpStateID);
+	
+	// select * from statesID (created above) and tempProducts and join both with sales 
 	ResultSet innerTable = stmt2.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
 			+ "FROM sales s RIGHT OUTER JOIN (SELECT * FROM statesID, tempProducts)"
 			+ "AS y ON s.uid = y.id AND s.pid = y.filteredId ");
 	
+	// populate inner cells
 	for(int i=0;i<customerlist.size();i++)
 	{
 		customer_name	=	customerlist.get(i).getName();
@@ -468,8 +478,7 @@ if (request.getParameter("rowDD").equals("States")){
 	}
 }
 else{
-	System.out.println("IN THE ELSE RS2");
-// if (!category)
+	// CUSTOMERS INNER TABLE QUERY
 	rs2=stmt2.executeQuery("SELECT * FROM tempCustomers");
 	ResultSet innerTable = stmt.executeQuery("SELECT coalesce(quantity*price,0) AS sum "
 			+ "FROM sales s RIGHT OUTER JOIN (SELECT tempProducts.filteredId AS pid, tempProducts.filteredName, "
