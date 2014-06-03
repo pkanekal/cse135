@@ -135,8 +135,9 @@ try
 				 
 			</select>
 			<br>
+			<%System.out.println("age is" + age); %>
 			Age:
-			<select name="age">
+			<select name="age">	
 				<option value="All" <% if (age.equals("All")) out.println("selected"); %>>All</option>
 				<option value= "12 AND 18" <% if (age.equals("12 AND 18")) out.println("selected"); %>>12-18</option>
 				<option value= "18 AND 45" <% if (age.equals("18 AND 45")) out.println("selected"); %>>18-45</option>
