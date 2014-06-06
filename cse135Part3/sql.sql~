@@ -63,7 +63,7 @@ GROUP BY p.id, u.id
 ORDER BY u.id
 
 
-INSERT INTO precomputeCategoryUSER(userID, cid, sum)
+INSERT INTO precomputeCategoryUser(userID, cid, sum)
 SELECT u.id, c.id, sum(s.quantity*s.price)
 FROM categories c, users u, products p, sales s
 WHERE c.id = p.cid AND u.id = s.uid
