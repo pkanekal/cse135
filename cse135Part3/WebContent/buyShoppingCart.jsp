@@ -22,7 +22,7 @@ if(session.getAttribute("name")!=null)
 <div style="width:79%; position:absolute; top:50px; right:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
 
 <%
-	 Connection conn=null;
+	Connection conn=null;
 	Statement stmt;
 	String SQL=null;
 	try
