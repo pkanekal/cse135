@@ -66,8 +66,8 @@ try
 	
 	if(("All").equals(state) && ("0").equals(category) && ("0").equals(age))//0,0,0
 	{
-		SQL_1="select id,name from users order by name asc offset "+pos_row+" limit "+show_num_row;
-		SQL_2="select id,name from products order by name asc offset "+pos_col+" limit "+show_num_col;
+		SQL_1="select id,name from users offset "+pos_row+" limit "+show_num_row;
+		SQL_2="select id,name from products offset "+pos_col+" limit "+show_num_col;
 		SQL_ut="insert into u_t (id, name) "+SQL_1;
 		SQL_pt="insert into p_t (id, name) "+SQL_2;
 		SQL_row="select count(*) from users";
@@ -364,25 +364,25 @@ try
 			if(maxUser>(pos_row+show_num_row-1))
 			{
 		%>
-		<input type="button" value="Next 20 Customers" onClick="doNext20()">
+		<!-- <input type="button" value="Next 20 Customers" onClick="doNext20()"> -->
 		<%
 			}
 			else
 			{
 		%>
-		<input type="button" value="Next 20 Customers" disabled="disabled">
+		<!-- <input type="button" value="Next 20 Customers" disabled="disabled"> -->
 		<%
 			}
 			if(maxProduct>pos_col+show_num_col)
 			{
 		%>
-		<input type="button" value="Next 10" onClick="doNext10()">
+		<!-- <input type="button" value="Next 10" onClick="doNext10()"> -->
 		<%
 			}
 			else
 			{
 		%>
-		<input type="button" value="Next 10" disabled="disabled">
+		<!-- <input type="button" value="Next 10" disabled="disabled"> -->
 		<%
 			}
 		%>
