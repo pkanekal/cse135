@@ -10,9 +10,13 @@
 <%
 
 ArrayList<String> p_name_list=new ArrayList<String>();//product ID, 10
+ArrayList<Integer> p_id_list=new ArrayList<Integer>();//product ID, 10
+ArrayList<Integer> u_id_list=new ArrayList<Integer>();//customer ID,20
 ArrayList<String> u_name_list=new ArrayList<String>();//customer ID,20
 HashMap<String, Integer> product_name_amount	=	new HashMap<String, Integer>();
 HashMap<String, Integer> customer_name_amount=	new HashMap<String, Integer>();
+HashMap<String, Integer> innerTable =	new HashMap<String, Integer>();
+
 %>
 <%
 	String  state=null, category=null;
@@ -43,9 +47,10 @@ HashMap<String, Integer> customer_name_amount=	new HashMap<String, Integer>();
 Connection	conn=null;
 Statement 	stmt,stmt2;
 ResultSet 	rs=null;
-String  	SQL_u=null,SQL_p=null;
-String  	SQL_amount_cell=null;
+String  	SQL_u=null,SQL_p=null, SQL_amount_cell=null;
+String  	SQL_ut=null,SQL_pt=null,SQL_su=null,SQL_sp=null;
 String		p_name=null,u_name=null;
+int			p_id=0,u_id=0;
 int 		p_amount_price=0,u_amount_price=0;
 
 int show_num_row=20, show_num_col=10;
@@ -62,118 +67,138 @@ try
 	
 	if(("All").equals(state) && ("0").equals(category))//no filters
 	{
-		SQL_u="SELECT u.name, sum(precomputeproduser.sum) "
+		SQL_u="SELECT u.id, u.name, sum(precomputeproduser.sum) "
 			+	"FROM precomputeproduser, users u "
 			+	"WHERE precomputeproduser.userid = u.id "
 			+	"GROUP BY u.id "
 			+	"ORDER BY sum desc LIMIT 20";
-		SQL_p="SELECT p.name, sum(precomputeproduser.sum) "
+		SQL_p="SELECT p.id, p.name, sum(precomputeproduser.sum) "
 			+	"FROM precomputeproduser, products p "
 			+	"WHERE precomputeproduser.prodid = p.id "
 			+	"GROUP BY p.id "
 			+	"ORDER BY sum desc LIMIT 10";
+		System.err.println("users with no filter");
 
 	}
 	
 	if(("All").equals(state) && !("0").equals(category))// only category filter
 	{
-		SQL_u="SELECT u.name, sum(precomputeproduser.sum) "
+		SQL_u="SELECT u.id, u.name, sum(precomputeproduser.sum) "
 			+	"FROM precomputeproduser, users u, products p, categories "
 			+	"WHERE precomputeproduser.userid = u.id AND precomputeproduser.prodid = p.id AND p.cid = categories.id AND categories.name = '"+category+"' "
 			+	"GROUP BY u.id "
 			+	"ORDER BY sum desc LIMIT 20";
-		SQL_p="SELECT p.name, sum(precomputeproduser.sum) "
+		SQL_p="SELECT p.id, p.name, sum(precomputeproduser.sum) "
 			+	"FROM precomputeproduser, products p, categories c "
 			+	"WHERE precomputeproduser.prodid = p.id AND p.cid = c.id AND c.name = '"+category+"' "
 			+	"GROUP BY p.id "
 			+	"ORDER BY sum desc LIMIT 10";
+		System.err.println("users with only category filter");
 
 	}
 	if(!("All").equals(state) && ("0").equals(category))// only state filter
 	{
-		SQL_u=" SELECT u.name, sum(pu.sum) "
-			+	"FROM state, precomputeproduser pu, users u "
-			+	"WHERE pu.userid = u.id AND u.state = state.id AND u.state = '"+state+"' "
+		SQL_u=" SELECT u.id, u.name, sum(pu.sum) "
+			+	"FROM precomputeproduser pu, users u "
+			+	"WHERE pu.userid = u.id AND u.state = '"+state+"' "
 			+	"GROUP BY u.id "
 			+	"ORDER BY sum desc LIMIT 20";
-		SQL_p="SELECT p.name, sum(precomputeprodstate.sum) "
-			+	"FROM precomputeprodstate, products p "
-			+	"WHERE precomputeprodstate.prodid = p.id " 
-			+	"AND precomputeprodstate.stateid = '"+state+"' "
+		SQL_p="SELECT p.id, p.name, sum(pu.sum) "
+			+	"FROM precomputeproduser pu, products p, users u "
+			+	"WHERE pu.prodid = p.id AND u.id = pu.userid " 
+			+	"AND u.state = '"+state+"' "
 			+	"GROUP BY p.id "
 			+	"ORDER BY sum desc LIMIT 10";
+		System.err.println("users with only state filter");
 
 	}
 	if(!("All").equals(state) && !("0").equals(category))// both filters
 	{
-		SQL_u="SELECT u.name, sum(pu.sum) "
+		SQL_u="SELECT u.id, u.name, sum(pu.sum) "
 			+	"FROM precomputeproduser pu, users u, products p, categories c "
 			+	"WHERE pu.userid = u.id AND pu.prodid = p.id AND p.cid = c.id AND c.name = '"+category+"' AND u.state = '"+state+"' "
 			+	"GROUP BY u.id "
 			+	"ORDER BY sum desc LIMIT 20";
-		SQL_p="SELECT p.name, sum(ps.sum) "
-			+	"FROM precomputeprodstate ps, state, products p, categories c "
-			+	"WHERE ps.stateid = state.id AND ps.prodid = p.id AND p.cid = c.id AND c.name = '"+category+"' AND state.id = '"+state+"' "
-			+	"GROUP BY p.name "
+		SQL_p="SELECT p.id, p.name, sum(pu.sum) "
+			+	"FROM precomputeproduser pu, products p, categories c, users u "
+			+	"WHERE pu.userid = u.id AND pu.prodid = p.id AND p.cid = c.id AND c.name = '"+category+"' AND u.state = '"+state+"' "
+			+	"GROUP BY p.id "
 			+	"ORDER BY sum desc LIMIT 10";
+		System.err.println("users with category and state filter");
 
 	}
 	System.err.println("SQL_u:");
 	System.err.println(SQL_u);
 	System.err.println("SQL_p:");
 	System.err.println(SQL_p);
+	
+	SQL_ut="insert into u_t (id, name, sum) "+SQL_u;
+	SQL_pt="insert into p_t (id, name, sum) "+SQL_p;
+	conn.setAutoCommit(false);
 
-	System.err.println("reached1");
+	stmt2.execute("CREATE TEMP TABLE u_t (id int, name text, sum int)");
+	stmt2.execute("CREATE TEMP TABLE p_t (id int, name text, sum int)");
+	
+	System.err.println("SQL_ut:");
+	System.err.println(SQL_ut);
+	System.err.println("SQL_pt:");
+	System.err.println(SQL_pt);
+	
+	//user tempory table
+	long start=System.currentTimeMillis();
+	stmt2.execute(SQL_ut);
+	long end=System.currentTimeMillis();
+    System.out.println("Finished user query, running time:"+(end-start)+"ms");
+    
+	//product tempory table
+	start=System.currentTimeMillis();
+	stmt2.execute(SQL_pt);
+	end=System.currentTimeMillis();
+    System.out.println("Finished products query, running time:"+(end-start)+"ms");
+    
+	SQL_su = "SELECT * FROM u_t ORDER BY sum DESC";
+	SQL_sp = "SELECT * FROM p_t ORDER BY sum DESC";
+	
 
 	//customer name and amount
-	rs=stmt.executeQuery(SQL_u);
-	System.err.println("reached2");
+	rs=stmt.executeQuery(SQL_su);
 
 	while(rs.next())
 	{
-		u_name=rs.getString(1);
+		u_id = rs.getInt(1);
+		u_id_list.add(u_id);
+		u_name=rs.getString(2);
 		u_name_list.add(u_name);
-		u_amount_price=rs.getInt(2);
+		u_amount_price=rs.getInt(3);
 		customer_name_amount.put(u_name, u_amount_price);
 		
 	}
 
 	//product name and amount
-		System.err.println("reached3");
 
-	rs=stmt.executeQuery(SQL_p);
-	System.err.println("reached4");
+	rs=stmt.executeQuery(SQL_sp);
 
 	while(rs.next())
 	{
-		p_name=rs.getString(1);
+		p_id = rs.getInt(1);
+		p_id_list.add(p_id);
+		p_name=rs.getString(2);
 	    p_name_list.add(p_name);
-		p_amount_price=rs.getInt(2);
+		p_amount_price=rs.getInt(3);
 
 		product_name_amount.put(p_name,p_amount_price);
 		
 	}
-	
-	
-	//temporary table
-	conn.setAutoCommit(false);
-	System.err.println("reached5");	
+	for (int i = 0; i < u_id_list.size(); i++) {
+		int userID = u_id_list.get(i);
+		for (int j = 0; j < p_id_list.size(); j++) {
+			int prodID = p_id_list.get(j);
+			
+			innerTable.put(userID+"_"+prodID,0);
+		}
+	}
 %>	
-<%	
 
-	
-	
-	
-//	out.println(SQL_amount_row+"<br>"+SQL_amount_col+"<br>"+SQL_amount_cell+"<BR>");
-	
-
-   
-    int i=0,j=0;
-	HashMap<String, String> pos_idPair=new HashMap<String, String>();
-	HashMap<String, Integer> idPair_amount=new HashMap<String, Integer>();	
-	int amount=0;
-	
-%>
 	<table align="center" width="100%" border="1">
 		<tr align="center">
 			<td width="12%"><table align="center" width="100%" border="0"><tr align="center"><td><strong><font size="+2" color="#FF00FF">CUSTOMER</font></strong></td></tr></table></td>
@@ -182,6 +207,7 @@ try
 					<tr align="center">
 <%	
 	int amount_show=0;
+	int i;
 	for(i=0;i<p_name_list.size();i++)
 	{
 		p_name			=	p_name_list.get(i);
@@ -231,50 +257,55 @@ try
 			{
 				out.println("<tr align=\"center\"><td width=\"10%\"><strong>"+u_name+"(<font color='#ff0000'>$0</font>)</strong></td></tr>");
 			}
-			for(j=0;j<p_name_list.size();j++)
-			{
-				p_name	=   p_name_list.get(j);
-				pos_idPair.put(i+"_"+j, u_name+"_"+p_name);
-				idPair_amount.put(u_name+"_"+p_name,0);
-			}
 		}
 	%>
 	</table>
 </td>
 <td width="88%">	
-	<%	
-		/*SQL_amount_cell="select s.uid, s.pid, sum(s.quantity*s.price) from u_t u,p_t p, sales s where s.uid=u.id and s.pid=p.id group by s.uid, s.pid;";
-		 rs=stmt.executeQuery(SQL_amount_cell);
-		 while(rs.next())
-		 {
-			 u_id=rs.getInt(1);
-			 p_id=rs.getInt(2);
-			 amount=rs.getInt(3);
-			 idPair_amount.put(u_id+"_"+p_id, amount);
-		 }*/
-		
-	%>	 
+
 	<table align="center" width="100%" border="1">
 	<%	
-		String idPair="";
-		/*for(i=0;i<u_list.size();i++)
-		{
-			out.println("<tr  align='center'>");
-			for(j=0;j<p_list.size();j++)
-			{
-				idPair=(String)pos_idPair.get(i+"_"+j);
-				amount=(Integer)idPair_amount.get(idPair);
-				if(amount==0)
-				{
+		// inner table query
+		SQL_amount_cell="SELECT pu.userid, pu.prodid, pu.sum FROM ("+SQL_su+") AS x, ("+SQL_sp+") AS y, precomputeproduser pu "
+				+ "WHERE x.id = pu.userid AND y.id = pu.prodid ORDER BY x.sum desc ";
+		System.err.println("SQL_amount_cell:");
+		System.err.println(SQL_amount_cell);
+		
+		// execute query
+		long startInner=System.currentTimeMillis();
+		rs=stmt.executeQuery(SQL_amount_cell);
+		long endInner=System.currentTimeMillis();
+		System.out.println("Finished inner table query, running time:"+(endInner-startInner)+"ms");
+		
+		
+		int counter = 0;
+		int amount = 0;
+		while(rs.next()) {
+			u_id = rs.getInt(1);
+			p_id = rs.getInt(2);
+			String check = u_id+"_"+p_id;
+			
+			if (innerTable.containsKey(check)) {
+				int sum = rs.getInt(3);
+				innerTable.put(check, sum);
+			}
+			
+		}
+		for (i = 0; i < u_id_list.size(); i++) {
+			u_id = u_id_list.get(i);
+			out.println("<tr>");
+			for (int j = 0; j < p_id_list.size(); j++) {
+				p_id = p_id_list.get(j);
+				String check = u_id+"_"+p_id;
+				int sum = innerTable.get(check);
+				if(sum==0) 
 					out.println("<td width=\"10%\"><font color='#ff0000'>0</font></td>");
-				}
 				else
-				{
-					out.println("<td width=\"10%\"><font color='#0000ff'><b>"+amount+"</b></font></td>");
-				}
+					out.println("<td width=\"10%\"><font color='#0000ff'><b>"+sum+"</b></font></td>");
 			}
 			out.println("</tr>");
-		}*/
+		}
+
 	%>
 	</table>
 	
@@ -289,6 +320,8 @@ try
 catch(Exception e)
 {
   e.printStackTrace();
+  out.println("Fail! Please connect your database first.");
+
 }
 %>	
 

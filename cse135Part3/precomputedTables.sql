@@ -14,7 +14,7 @@ GROUP BY p.id, st.id
 ORDER BY sum desc;
 
 // state no filter
-SELECT state.name, sum(precomputeprodstate.sum) 
+SELECT state.id, state.name, sum(precomputeprodstate.sum) 
 FROM precomputeprodstate, state 
 WHERE precomputeprodstate.stateid = state.id
 GROUP BY state.id
@@ -97,3 +97,11 @@ FROM state, precomputeprodstate, categories, products p
 WHERE precomputeprodstate.stateid = state.id AND precomputeprodstate.prodid = p.id AND p.cid = categories.id AND categories.name = 'C5' AND state.name = 'Alabama'
 GROUP BY state.id
 ORDER BY state.name; 
+
+
+// inner table no filter
+SELECT ps.sum FROM 
+(SELECT state.id, state.name, sum(precomputeprodstate.sum) FROM precomputeprodstate, state WHERE precomputeprodstate.stateid = state.id GROUP BY state.id ORDER BY sum desc LIMIT 20) AS x, 
+(SELECT p.id, p.name, sum(precomputeproduser.sum) FROM precomputeproduser, products p WHERE precomputeproduser.prodid = p.id GROUP BY p.id ORDER BY sum desc LIMIT 10) AS y, precomputeprodstate ps 
+WHERE x.id = ps.stateid AND y.id = ps.prodid ORDER BY x.sum desc;
+
