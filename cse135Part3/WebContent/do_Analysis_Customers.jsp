@@ -364,25 +364,25 @@ try
 			if(maxUser>(pos_row+show_num_row-1))
 			{
 		%>
-		<input type="button" value="Next 20 Customers" onClick="doNext20()">
+		<!-- <input type="button" value="Next 20 Customers" onClick="doNext20()"> -->
 		<%
 			}
 			else
 			{
 		%>
-		<input type="button" value="Next 20 Customers" disabled="disabled">
+		<!-- <input type="button" value="Next 20 Customers" disabled="disabled"> -->
 		<%
 			}
 			if(maxProduct>pos_col+show_num_col)
 			{
 		%>
-		<input type="button" value="Next 10" onClick="doNext10()">
+		<!-- <input type="button" value="Next 10" onClick="doNext10()"> -->
 		<%
 			}
 			else
 			{
 		%>
-		<input type="button" value="Next 10" disabled="disabled">
+		<!-- <input type="button" value="Next 10" disabled="disabled"> -->
 		<%
 			}
 		%>

@@ -142,7 +142,11 @@ try
 				 
 			</select>
 			<br>
+			<%System.out.println("age is" + age); %>
 			Age:
+<<<<<<< HEAD
+			<select name="age">	
+=======
 				<% 
  			if (request.getParameter("offsetvar") == null || request.getParameter("offsetvar2") == null)
  			{ %>
@@ -150,6 +154,7 @@ try
  			else{ %>
  			<select disabled name="age"> <%} %>
  				<option value = "All">All</option>
+>>>>>>> faf02792cb820ccba66802e20639e291c62d0819
 				<option value="All" <% if (age.equals("All")) out.println("selected"); %>>All</option>
 				<option value= "12 AND 18" <% if (age.equals("12 AND 18")) out.println("selected"); %>>12-18</option>
 				<option value= "18 AND 45" <% if (age.equals("18 AND 45")) out.println("selected"); %>>18-45</option>
