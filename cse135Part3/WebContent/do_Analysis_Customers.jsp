@@ -72,8 +72,8 @@ try
 		SQL_pt="insert into p_t (id, name) "+SQL_2;
 		SQL_row="select count(*) from users";
 		SQL_col="select count(*) from products";
-		SQL_amount_row="select s.uid, sum(s.quantity*s.price) from  u_t u, sales s  where s.uid=u.id group by s.uid;";
-		SQL_amount_col="select s.pid, sum(s.quantity*s.price) from p_t p, sales s where s.pid=p.id  group by s.pid;";
+		SQL_amount_row="select s.uid, sum(s.quantity*s.price) from  u_t u, sales s  where s.uid=u.id group by s.uid order by sum asc;";
+		SQL_amount_col="select s.pid, sum(s.quantity*s.price) from p_t p, sales s where s.pid=p.id  group by s.pid order by sum asc;";
 	}
 	
 	if(("All").equals(state) && !("0").equals(category) && ("0").equals(age))//0,1,0
