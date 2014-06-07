@@ -65,6 +65,17 @@ CREATE TABLE precomputeProdState (
 	sum     INTEGER NOT NULL
 );
 
+CREATE TABLE precomputeUsers (
+	id	SERIAL PRIMARY KEY,
+	userID  INTEGER REFERENCES users (id) ON DELETE CASCADE,
+	sum     INTEGER NOT NULL
+);
+
+CREATE TABLE precomputeProducts (
+	id	SERIAL PRIMARY KEY,
+	productID  INTEGER REFERENCES products (id) ON DELETE CASCADE,
+	sum     INTEGER NOT NULL
+);
 INSERT INTO state(name)
 VALUES
 ('Alabama'),

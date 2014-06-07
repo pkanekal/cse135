@@ -69,11 +69,11 @@ try
 			+	"WHERE precomputeprodstate.stateid = state.id "
 			+	"GROUP BY state.id "
 			+	"ORDER BY sum desc LIMIT 20";
-		SQL_p="SELECT p.id, p.name, sum(precomputeproduser.sum) "
-			+	"FROM precomputeproduser, products p "
-			+	"WHERE precomputeproduser.prodid = p.id "
-			+	"GROUP BY p.id "
-			+	"ORDER BY sum desc LIMIT 10";
+		SQL_p="SELECT p.id, p.name, sum(precomputeproducts.sum) "
+				+	"FROM precomputeproducts, products p "
+				+	"WHERE precomputeproducts.productID = p.id "
+				+	"GROUP BY p.id "
+				+	"ORDER BY sum desc LIMIT 10";
 		System.err.println("state no filter");
 
 	}
@@ -85,11 +85,11 @@ try
 			+	"WHERE precomputeprodstate.stateid = state.id AND precomputeprodstate.prodid = p.id AND p.cid = categories.id AND categories.name = '"+category+"' "
 			+	"GROUP BY state.id "
 			+	"ORDER BY sum desc LIMIT 20";
-		SQL_p="SELECT p.id, p.name, sum(precomputeproduser.sum) "
-			+	"FROM precomputeproduser, products p, categories c "
-			+	"WHERE precomputeproduser.prodid = p.id AND p.cid = c.id AND c.name = '"+category+"' "
-			+	"GROUP BY p.id "
-			+	"ORDER BY sum desc LIMIT 10";
+		SQL_p="SELECT p.id, p.name, sum(pp.sum) "
+				+	"FROM precomputeproducts pp, products p, categories c "
+				+	"WHERE pp.productID = p.id AND p.cid = c.id AND c.name = '"+category+"' "
+				+	"GROUP BY p.id "
+				+	"ORDER BY sum desc LIMIT 10";
 		System.err.println("state with only category filter");
 
 	}
@@ -126,11 +126,11 @@ try
 
 	}
 
-	System.err.println("SQL_s:");
+	/*System.err.println("SQL_s:");
 	System.err.println(SQL_s);
 	System.err.println("SQL_p:");
 	System.err.println(SQL_p);
-
+*/
 	SQL_st="insert into s_t (id, name, sum) "+SQL_s;
 	SQL_pt="insert into p_t (id, name, sum) "+SQL_p;
 	conn.setAutoCommit(false);
@@ -138,11 +138,11 @@ try
 	stmt2.execute("CREATE TEMP TABLE s_t (id int, name text, sum int)");
 	stmt2.execute("CREATE TEMP TABLE p_t (id int, name text, sum int)");
 	
-	System.err.println("SQL_st:");
+	/*System.err.println("SQL_st:");
 	System.err.println(SQL_st);
 	System.err.println("SQL_pt:");
 	System.err.println(SQL_pt);
-	
+	*/
 	//state tempory table
 	long start=System.currentTimeMillis();
 	stmt2.execute(SQL_st);
@@ -272,8 +272,8 @@ try
 		// inner table query
 		SQL_amount_cell="SELECT ps.sum FROM ("+SQL_ss+") AS x, ("+SQL_sp+") AS y, precomputeprodstate ps "
 				+ "WHERE x.id = ps.stateid AND y.id = ps.prodid ORDER BY x.sum desc ";
-		System.err.println("SQL_amount_cell:");
-		System.err.println(SQL_amount_cell);
+		//System.err.println("SQL_amount_cell:");
+		//System.err.println(SQL_amount_cell);
 	
 		long startInner=System.currentTimeMillis();
  		rs=stmt.executeQuery(SQL_amount_cell);

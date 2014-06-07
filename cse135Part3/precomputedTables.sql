@@ -13,6 +13,18 @@ WHERE p.id = s.pid AND u.id = s.uid AND u.state = st.id
 GROUP BY p.id, st.id 
 ORDER BY sum desc;
 
+INSERT INTO precomputeUsers(userID, sum)
+SELECT pu.userid, sum(pu.sum) 
+FROM precomputeproduser pu
+GROUP BY pu.userid 
+ORDER BY sum desc;
+
+INSERT INTO precomputeProducts(productID, sum)
+SELECT pu.prodid, sum(pu.sum) 
+FROM precomputeproduser pu
+GROUP BY pu.prodid 
+ORDER BY sum desc;
+
 // state no filter
 SELECT state.id, state.name, sum(precomputeprodstate.sum) 
 FROM precomputeprodstate, state 

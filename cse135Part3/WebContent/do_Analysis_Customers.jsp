@@ -67,14 +67,14 @@ try
 	
 	if(("All").equals(state) && ("0").equals(category))//no filters
 	{
-		SQL_u="SELECT u.id, u.name, sum(precomputeproduser.sum) "
-			+	"FROM precomputeproduser, users u "
-			+	"WHERE precomputeproduser.userid = u.id "
+		SQL_u="SELECT u.id, u.name, sum(precomputeusers.sum) "
+			+	"FROM precomputeusers, users u "
+			+	"WHERE precomputeusers.userID = u.id "
 			+	"GROUP BY u.id "
 			+	"ORDER BY sum desc LIMIT 20";
-		SQL_p="SELECT p.id, p.name, sum(precomputeproduser.sum) "
-			+	"FROM precomputeproduser, products p "
-			+	"WHERE precomputeproduser.prodid = p.id "
+		SQL_p="SELECT p.id, p.name, sum(precomputeproducts.sum) "
+			+	"FROM precomputeproducts, products p "
+			+	"WHERE precomputeproducts.productID = p.id "
 			+	"GROUP BY p.id "
 			+	"ORDER BY sum desc LIMIT 10";
 		System.err.println("users with no filter");
@@ -83,32 +83,33 @@ try
 	
 	if(("All").equals(state) && !("0").equals(category))// only category filter
 	{
-		SQL_u="SELECT u.id, u.name, sum(precomputeproduser.sum) "
-			+	"FROM precomputeproduser, users u, products p, categories "
-			+	"WHERE precomputeproduser.userid = u.id AND precomputeproduser.prodid = p.id AND p.cid = categories.id AND categories.name = '"+category+"' "
-			+	"GROUP BY u.id "
-			+	"ORDER BY sum desc LIMIT 20";
-		SQL_p="SELECT p.id, p.name, sum(precomputeproduser.sum) "
-			+	"FROM precomputeproduser, products p, categories c "
-			+	"WHERE precomputeproduser.prodid = p.id AND p.cid = c.id AND c.name = '"+category+"' "
-			+	"GROUP BY p.id "
-			+	"ORDER BY sum desc LIMIT 10";
+			SQL_u="SELECT u.id, u.name, sum(precomputeproduser.sum) "
+				+	"FROM precomputeproduser, users u, products p, categories "
+				+	"WHERE precomputeproduser.userid = u.id AND precomputeproduser.prodid = p.id AND p.cid = categories.id AND categories.name = '"+category+"' "
+				+	"GROUP BY u.id "
+				+	"ORDER BY sum desc LIMIT 20";
+			SQL_p="SELECT p.id, p.name, sum(pp.sum) "
+				+	"FROM precomputeproducts pp, products p, categories c "
+				+	"WHERE pp.productID = p.id AND p.cid = c.id AND c.name = '"+category+"' "
+				+	"GROUP BY p.id "
+				+	"ORDER BY sum desc LIMIT 10";
 		System.err.println("users with only category filter");
 
 	}
 	if(!("All").equals(state) && ("0").equals(category))// only state filter
 	{
-		SQL_u=" SELECT u.id, u.name, sum(pu.sum) "
-			+	"FROM precomputeproduser pu, users u "
-			+	"WHERE pu.userid = u.id AND u.state = '"+state+"' "
-			+	"GROUP BY u.id "
-			+	"ORDER BY sum desc LIMIT 20";
+		SQL_u="SELECT u.id, u.name, sum(precomputeusers.sum) "
+				+	"FROM precomputeusers, users u "
+				+	"WHERE precomputeusers.userID = u.id AND u.state ='"+state+"' "
+				+	"GROUP BY u.id "
+				+	"ORDER BY sum desc LIMIT 20";
 		SQL_p="SELECT p.id, p.name, sum(pu.sum) "
 			+	"FROM precomputeproduser pu, products p, users u "
 			+	"WHERE pu.prodid = p.id AND u.id = pu.userid " 
 			+	"AND u.state = '"+state+"' "
 			+	"GROUP BY p.id "
 			+	"ORDER BY sum desc LIMIT 10";
+		
 		System.err.println("users with only state filter");
 
 	}
@@ -127,11 +128,11 @@ try
 		System.err.println("users with category and state filter");
 
 	}
-	System.err.println("SQL_u:");
+	/*System.err.println("SQL_u:");
 	System.err.println(SQL_u);
 	System.err.println("SQL_p:");
 	System.err.println(SQL_p);
-	
+	*/
 	SQL_ut="insert into u_t (id, name, sum) "+SQL_u;
 	SQL_pt="insert into p_t (id, name, sum) "+SQL_p;
 	conn.setAutoCommit(false);
