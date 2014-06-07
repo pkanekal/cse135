@@ -96,7 +96,7 @@ GROUP BY p.id, u.id
 ORDER BY sum desc;
 
 CREATE INDEX uIndex ON precomputeProdUser(userID);
-CREATE INDEX pIndex ON precomputeProdUser(productID);
+CREATE INDEX pIndex ON precomputeProdUser(prodID);
 
 INSERT INTO precomputeProdState(prodid, stateid, sum)
 SELECT p.id, st.id, sum(s.quantity*s.price)

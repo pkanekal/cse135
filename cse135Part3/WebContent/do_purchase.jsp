@@ -46,7 +46,6 @@ if(session.getAttribute("name")!=null)
 					
 					String SQL_copy="INSERT INTO sales (uid, pid, quantity, price) select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
 					
-					//String  SQL="delete from carts where uid="+userID+";";
 					
 					try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
 					String url="jdbc:postgresql://localhost/cse135?";
@@ -57,11 +56,12 @@ if(session.getAttribute("name")!=null)
 					stmt2 =conn.createStatement();
 
 					try{
+						conn.setAutoCommit(false);
+
 						String salesByUser = "select c.uid, c.pid, c.quantity, c.price from carts c where c.uid='"+userID+"' ";
 						System.err.println("salesByCurrentUser: ");
 						System.err.println(salesByUser);
 						
-						conn.setAutoCommit(false);
 						/**record log,i.e., sales table**/
 						
 						rs = stmt.executeQuery(salesByUser);
@@ -132,6 +132,9 @@ if(session.getAttribute("name")!=null)
 						
 						conn.commit();
 						conn.setAutoCommit(true);
+						String  SQL_del="delete from carts where uid="+userID+";";
+						stmt.execute(SQL_del);
+						
 						out.println("Dear customer '"+uName+"', Thanks for your purchasing.<br> Your card '"+card+"' has been successfully proved. <br>We will ship the products soon.");
 						out.println("<br><font size=\"+2\" color=\"#990033\"> <a href=\"products_browsing.jsp\" target=\"_self\">Continue purchasing</a></font>");
 					}

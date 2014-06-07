@@ -46,7 +46,7 @@ try
 				<tr>
 					<td>State</td>
 					<td>Category</td>
-					<td>Age</td>
+					<td>Age</td>	
 				</tr>
 				<tr>
 					<td>
@@ -123,7 +123,7 @@ try
 						</select>
 					</td>
 					<td>
-						<select name="search_key_3" id="search_key_3">
+						<select name="search_key_3" id="search_key_3" disabled>
 							<option value="0" selected="selected">All Ages</option>
 							<option value="12_18">12-18</option>
 							<option value="18_45">18-45</option>

@@ -8,7 +8,7 @@
 
 <body>
 <%
-
+System.err.println("starting...");
 ArrayList<String> p_name_list=new ArrayList<String>();//product ID, 10
 ArrayList<Integer> p_id_list=new ArrayList<Integer>();//product ID, 10
 ArrayList<Integer> u_id_list=new ArrayList<Integer>();//customer ID,20
@@ -312,7 +312,7 @@ try
 </td>
 </tr>
 </table>	
-<%
+<% 
 	conn.commit();
 	conn.setAutoCommit(true);
 	conn.close();
