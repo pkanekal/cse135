@@ -8,7 +8,6 @@
 
 <body>
 <%
-System.err.println("starting...");
 ArrayList<String> p_name_list=new ArrayList<String>();//product ID, 10
 ArrayList<Integer> p_id_list=new ArrayList<Integer>();//product ID, 10
 ArrayList<Integer> u_id_list=new ArrayList<Integer>();//customer ID,20
@@ -267,8 +266,10 @@ try
 	<table align="center" width="100%" border="1">
 	<%	
 		// inner table query
-		SQL_amount_cell="SELECT pu.userid, pu.prodid, pu.sum FROM ("+SQL_su+") AS x, ("+SQL_sp+") AS y, precomputeproduser pu "
-				+ "WHERE x.id = pu.userid AND y.id = pu.prodid ORDER BY x.sum desc ";
+	SQL_amount_cell="SELECT w.userid, w.prodid, w.sum "
+			+	"FROM (SELECT pu.userid, pu.prodid, pu.sum FROM  ("+SQL_sp+") AS y LEFT OUTER JOIN precomputeproduser pu ON y.id = pu.prodid) AS w "
+			+	"RIGHT OUTER JOIN ("+SQL_su+") AS x ON x.id = w.userid "
+			+	"ORDER BY x.sum desc"; 
 		System.err.println("SQL_amount_cell:");
 		System.err.println(SQL_amount_cell);
 		// execute query

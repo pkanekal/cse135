@@ -270,8 +270,13 @@ try
 	<table align="center" width="100%" border="1">
 	<%	
 		// inner table query
-		SQL_amount_cell="SELECT ps.sum FROM ("+SQL_ss+") AS x, ("+SQL_sp+") AS y, precomputeprodstate ps "
-				+ "WHERE x.id = ps.stateid AND y.id = ps.prodid ORDER BY x.sum desc ";
+		//SQL_amount_cell="SELECT ps.sum FROM ("+SQL_ss+") AS x, ("+SQL_sp+") AS y, precomputeprodstate ps "
+		//		+ "WHERE x.id = ps.stateid AND y.id = ps.prodid ORDER BY x.sum desc ";
+		SQL_amount_cell="SELECT w.sum "
+				+	"FROM (SELECT stateid, ps.sum FROM ("+SQL_sp+") AS y "
+				+	"LEFT OUTER JOIN precomputeprodstate ps ON y.id = ps.prodid) AS w "
+				+	"RIGHT OUTER JOIN ("+SQL_ss+") AS x ON x.id = w.stateid "
+				+	"ORDER BY x.sum desc ";	
 		System.err.println("SQL_amount_cell:");
 		System.err.println(SQL_amount_cell);
 	
