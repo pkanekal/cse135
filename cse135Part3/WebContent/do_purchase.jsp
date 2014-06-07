@@ -27,6 +27,8 @@ if(session.getAttribute("name")!=null)
 	int userID  = (Integer)session.getAttribute("userID");
 	String role = (String)session.getAttribute("role");
 	String card=null;
+	ResultSet rs = null;
+	ResultSet rs2 = null;
 	int card_num=0;
 	try {card=request.getParameter("card"); }catch(Exception e){card=null;}
 	try
@@ -41,6 +43,11 @@ if(session.getAttribute("name")!=null)
 				{
 					
 					String SQL_copy="INSERT INTO sales (uid, pid, quantity, price) select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
+					String SQLpull1="select * from carts where uid="+userID+" and pid="+pid+";";
+					String SQLpull2="select * from carts c,users u where c.uid="+userID" and state
+					String SQLpull3=
+					String SQLpull4=
+					
 					String  SQL="delete from carts where uid="+userID+";";
 					
 					try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
@@ -55,6 +62,23 @@ if(session.getAttribute("name")!=null)
 							conn.setAutoCommit(false);
 							/**record log,i.e., sales table**/
 							stmt.execute(SQL_copy);
+							rs=stmt.executeQuery(SQLpull);
+							while(rs.next())
+							{
+								 int userId=rs.getInt(1);
+								 int productId = rs.getInt(2);
+								 int quantity = rs.getInt(3);
+								 int amount = res.getInt(4);
+							} 
+							int cartsum = quantity * amount;
+							rs2 = stmt.execute("select * from precomputedprodusers a where a.userID ="+userId+" and a.prodID ="+productId+";")"
+							if (rs2.next)
+							{
+								stmt.execute("update precomputedprodusers set sum = sum + "+sum+";")
+							}
+							else
+								stmt.execute("insert into precomputedprodusers ")
+							
 							stmt.execute(SQL);
 							conn.commit();
 							
