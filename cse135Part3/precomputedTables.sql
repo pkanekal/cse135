@@ -5,6 +5,9 @@ WHERE p.id = s.pid AND u.id = s.uid
 GROUP BY p.id, u.id
 ORDER BY sum desc;
 
+CREATE INDEX uIndex ON precomputeProdUser(userID);
+CREATE INDEX pIndex ON precomputeProdUser(productID);
+
 
 INSERT INTO precomputeProdState(prodid, stateid, sum)
 SELECT p.id, st.id, sum(s.quantity*s.price)
@@ -12,6 +15,9 @@ FROM products p,sales s, state st, users u
 WHERE p.id = s.pid AND u.id = s.uid AND u.state = st.id
 GROUP BY p.id, st.id 
 ORDER BY sum desc;
+
+CREATE INDEX pNdx ON precomputeProdState(prodid);
+CREATE INDEX sNdx ON precomputeProdState(stateid);
 
 INSERT INTO precomputeUsers(userID, sum)
 SELECT pu.userid, sum(pu.sum) 

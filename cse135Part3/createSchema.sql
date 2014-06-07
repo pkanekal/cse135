@@ -3,6 +3,17 @@ DROP TABLE categories CASCADE;
 DROP TABLE products CASCADE;
 DROP TABLE sales CASCADE;
 DROP TABLE carts CASCADE;
+DROP TABLE precomputeProdUser CASCADE;
+DROP TABLE precomputeProdState CASCADE;
+DROP TABLE precomputeUsers CASCADE;
+DROP TABLE precomputeProducts CASCADE;
+
+DROP INDEX uIndex;
+DROP INDEX pIndex;
+DROP INDEX pNdx;
+DROP INDEX sNdx;
+DROP INDEX userIndex;
+DROP INDEX productIndex;
 
 CREATE TABLE state (
     id      SERIAL PRIMARY KEY,
@@ -49,7 +60,7 @@ CREATE TABLE carts (
 
 
 CREATE INDEX userIndex ON sales(uid);
-CREATE INDEX products ON sales(pid);
+CREATE INDEX productIndex ON sales(pid);
 
 CREATE TABLE precomputeProdUser (
     id       SERIAL PRIMARY KEY,
@@ -76,6 +87,39 @@ CREATE TABLE precomputeProducts (
 	productID  INTEGER REFERENCES products (id) ON DELETE CASCADE,
 	sum     INTEGER NOT NULL
 );
+
+INSERT INTO precomputeProdUser(userID, prodID, sum)
+SELECT u.id, p.id, sum(s.quantity*s.price)
+FROM products p, users u, sales s
+WHERE p.id = s.pid AND u.id = s.uid
+GROUP BY p.id, u.id
+ORDER BY sum desc;
+
+CREATE INDEX uIndex ON precomputeProdUser(userID);
+CREATE INDEX pIndex ON precomputeProdUser(productID);
+
+INSERT INTO precomputeProdState(prodid, stateid, sum)
+SELECT p.id, st.id, sum(s.quantity*s.price)
+FROM products p,sales s, state st, users u
+WHERE p.id = s.pid AND u.id = s.uid AND u.state = st.id
+GROUP BY p.id, st.id 
+ORDER BY sum desc;
+
+CREATE INDEX pNdx ON precomputeProdState(prodid);
+CREATE INDEX sNdx ON precomputeProdState(stateid);
+
+INSERT INTO precomputeUsers(userID, sum)
+SELECT pu.userid, sum(pu.sum) 
+FROM precomputeproduser pu
+GROUP BY pu.userid 
+ORDER BY sum desc;
+
+INSERT INTO precomputeProducts(productID, sum)
+SELECT pu.prodid, sum(pu.sum) 
+FROM precomputeproduser pu
+GROUP BY pu.prodid 
+ORDER BY sum desc;
+
 INSERT INTO state(name)
 VALUES
 ('Alabama'),

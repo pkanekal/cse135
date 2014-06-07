@@ -53,7 +53,7 @@ int show_num_row=20, show_num_col=10;
 	
 try
 {
-	try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
+	try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.err.println("Driver error");}
 	String url="jdbc:postgresql://localhost/cse135?";
 	String user="postgres";
 	String password="postgres";
@@ -74,7 +74,7 @@ try
 				+	"WHERE precomputeproducts.productID = p.id "
 				+	"GROUP BY p.id "
 				+	"ORDER BY sum desc LIMIT 10";
-		System.err.println("state no filter");
+		System.err.println("state with no filter");
 
 	}
 	
@@ -126,11 +126,11 @@ try
 
 	}
 
-	/*System.err.println("SQL_s:");
+	System.err.println("SQL_s:");
 	System.err.println(SQL_s);
 	System.err.println("SQL_p:");
 	System.err.println(SQL_p);
-*/
+
 	SQL_st="insert into s_t (id, name, sum) "+SQL_s;
 	SQL_pt="insert into p_t (id, name, sum) "+SQL_p;
 	conn.setAutoCommit(false);
@@ -138,22 +138,22 @@ try
 	stmt2.execute("CREATE TEMP TABLE s_t (id int, name text, sum int)");
 	stmt2.execute("CREATE TEMP TABLE p_t (id int, name text, sum int)");
 	
-	/*System.err.println("SQL_st:");
+	System.err.println("SQL_st:");
 	System.err.println(SQL_st);
 	System.err.println("SQL_pt:");
 	System.err.println(SQL_pt);
-	*/
+	
 	//state tempory table
 	long start=System.currentTimeMillis();
 	stmt2.execute(SQL_st);
 	long end=System.currentTimeMillis();
-    System.out.println("Finished states query, running time:"+(end-start)+"ms");
+    System.err.println("Finished states query, running time:"+(end-start)+"ms");
     
 	//product tempory table
 	start=System.currentTimeMillis();
 	stmt2.execute(SQL_pt);
 	end=System.currentTimeMillis();
-    System.out.println("Finished products query, running time:"+(end-start)+"ms");
+    System.err.println("Finished products query, running time:"+(end-start)+"ms");
     
 	
 	// select from temp tables
@@ -272,13 +272,14 @@ try
 		// inner table query
 		SQL_amount_cell="SELECT ps.sum FROM ("+SQL_ss+") AS x, ("+SQL_sp+") AS y, precomputeprodstate ps "
 				+ "WHERE x.id = ps.stateid AND y.id = ps.prodid ORDER BY x.sum desc ";
-		//System.err.println("SQL_amount_cell:");
-		//System.err.println(SQL_amount_cell);
+		System.err.println("SQL_amount_cell:");
+		System.err.println(SQL_amount_cell);
 	
 		long startInner=System.currentTimeMillis();
  		rs=stmt.executeQuery(SQL_amount_cell);
  		long endInner=System.currentTimeMillis();
- 	    System.out.println("Finished inner table query, running time:"+(endInner-startInner)+"ms");
+ 	    System.err.println("Finished inner table query, running time:"+(endInner-startInner)+"ms");
+ 	    System.err.println();
  		int counter = 0;
 		while(rs.next()) {
 			if (counter == 0)
