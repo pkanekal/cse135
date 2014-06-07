@@ -39,16 +39,14 @@ if(session.getAttribute("name")!=null)
 	
 				Connection conn=null;
 				Statement stmt=null;
+				Statement stmt2=null;
+
 				try
 				{
 					
 					String SQL_copy="INSERT INTO sales (uid, pid, quantity, price) select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
-					String SQLpull1="select * from carts where uid="+userID+" and pid="+pid+";";
-					String SQLpull2="select * from carts c,users u where c.uid="+userID" and state
-					String SQLpull3=
-					String SQLpull4=
 					
-					String  SQL="delete from carts where uid="+userID+";";
+					//String  SQL="delete from carts where uid="+userID+";";
 					
 					try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
 					String url="jdbc:postgresql://localhost/cse135?";
@@ -56,35 +54,43 @@ if(session.getAttribute("name")!=null)
 					String password="postgres";
 					conn =DriverManager.getConnection(url, user, password);
 					stmt =conn.createStatement();
-				
+
 					try{
-					
-							conn.setAutoCommit(false);
-							/**record log,i.e., sales table**/
-							stmt.execute(SQL_copy);
-							rs=stmt.executeQuery(SQLpull);
-							while(rs.next())
-							{
-								 int userId=rs.getInt(1);
-								 int productId = rs.getInt(2);
-								 int quantity = rs.getInt(3);
-								 int amount = res.getInt(4);
-							} 
-							int cartsum = quantity * amount;
-							rs2 = stmt.execute("select * from precomputedprodusers a where a.userID ="+userId+" and a.prodID ="+productId+";")"
-							if (rs2.next)
-							{
-								stmt.execute("update precomputedprodusers set sum = sum + "+sum+";")
+						String salesByUser = "select c.uid, c.pid, c.quantity, c.price from carts c where c.uid='"+userID+"' ";
+						System.err.println("salesByCurrentUser: ");
+						System.err.println(salesByUser);
+						
+						conn.setAutoCommit(false);
+						/**record log,i.e., sales table**/
+						
+						rs = stmt.executeQuery(salesByUser);
+						while (rs.next()) { // for each sale by the current user
+							int uid = rs.getInt(1);
+							int pid = rs.getInt(2);
+							int qty = rs.getInt(3);
+							int price = rs.getInt(4);
+							int sum = qty * price;
+							
+							String check1 = "SELECT * FROM precomputedproduser pu WHERE pu.userid = '"+uid+"' AND pu.prodid = '"+uid+"' ";
+							System.err.println("check1: ");
+							System.err.println(check1);
+							
+							rs2 = stmt2.executeQuery(check1);
+							if (rs2.next()) { // update precomputedproduser
+								/* UPDATE ProductSales 
+								SET sumamt = sumamt + 10 
+								WHERE product = 23*/
+								stmt2.execute("UPDATE precomputedproduser SET sum = sum + "+sum+" WHERE userid = '"+uid+"' AND prodid = '"+pid+"'");
 							}
-							else
-								stmt.execute("insert into precomputedprodusers ")
-							
-							stmt.execute(SQL);
-							conn.commit();
-							
-							conn.setAutoCommit(true);
-							out.println("Dear customer '"+uName+"', Thanks for your purchasing.<br> Your card '"+card+"' has been successfully proved. <br>We will ship the products soon.");
-							out.println("<br><font size=\"+2\" color=\"#990033\"> <a href=\"products_browsing.jsp\" target=\"_self\">Continue purchasing</a></font>");
+							else { // insert into precomputedproduser
+								stmt2.execute("INSERT INTO precomputedproduser (userid, prodid, sum) VALUES ('"+uid+"', '"+pid+"', '"+sum+"') ");
+							}
+						}
+						
+						conn.commit();
+						conn.setAutoCommit(true);
+						out.println("Dear customer '"+uName+"', Thanks for your purchasing.<br> Your card '"+card+"' has been successfully proved. <br>We will ship the products soon.");
+						out.println("<br><font size=\"+2\" color=\"#990033\"> <a href=\"products_browsing.jsp\" target=\"_self\">Continue purchasing</a></font>");
 					}
 					catch(Exception e)
 					{
