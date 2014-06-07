@@ -57,7 +57,7 @@ int show_num_row=20, show_num_col=10;
 	
 try
 {
-	try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
+	try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.err.println("Driver error");}
 	String url="jdbc:postgresql://localhost/cse135?";
 	String user="postgres";
 	String password="postgres";
@@ -128,11 +128,11 @@ try
 		System.err.println("users with category and state filter");
 
 	}
-	/*System.err.println("SQL_u:");
+	System.err.println("SQL_u:");
 	System.err.println(SQL_u);
 	System.err.println("SQL_p:");
 	System.err.println(SQL_p);
-	*/
+	
 	SQL_ut="insert into u_t (id, name, sum) "+SQL_u;
 	SQL_pt="insert into p_t (id, name, sum) "+SQL_p;
 	conn.setAutoCommit(false);
@@ -149,13 +149,13 @@ try
 	long start=System.currentTimeMillis();
 	stmt2.execute(SQL_ut);
 	long end=System.currentTimeMillis();
-    System.out.println("Finished user query, running time:"+(end-start)+"ms");
+    System.err.println("Finished user query, running time:"+(end-start)+"ms");
     
 	//product tempory table
 	start=System.currentTimeMillis();
 	stmt2.execute(SQL_pt);
 	end=System.currentTimeMillis();
-    System.out.println("Finished products query, running time:"+(end-start)+"ms");
+    System.err.println("Finished products query, running time:"+(end-start)+"ms");
     
 	SQL_su = "SELECT * FROM u_t ORDER BY sum DESC";
 	SQL_sp = "SELECT * FROM p_t ORDER BY sum DESC";
@@ -271,14 +271,13 @@ try
 				+ "WHERE x.id = pu.userid AND y.id = pu.prodid ORDER BY x.sum desc ";
 		System.err.println("SQL_amount_cell:");
 		System.err.println(SQL_amount_cell);
-		
 		// execute query
 		long startInner=System.currentTimeMillis();
 		rs=stmt.executeQuery(SQL_amount_cell);
 		long endInner=System.currentTimeMillis();
-		System.out.println("Finished inner table query, running time:"+(endInner-startInner)+"ms");
-		
-		
+		System.err.println("Finished inner table query, running time:"+(endInner-startInner)+"ms");
+		System.err.println();
+
 		int counter = 0;
 		int amount = 0;
 		while(rs.next()) {
