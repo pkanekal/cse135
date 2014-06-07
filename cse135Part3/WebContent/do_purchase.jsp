@@ -54,6 +54,7 @@ if(session.getAttribute("name")!=null)
 					String password="postgres";
 					conn =DriverManager.getConnection(url, user, password);
 					stmt =conn.createStatement();
+					stmt2 =conn.createStatement();
 
 					try{
 						String salesByUser = "select c.uid, c.pid, c.quantity, c.price from carts c where c.uid='"+userID+"' ";
@@ -70,20 +71,62 @@ if(session.getAttribute("name")!=null)
 							int qty = rs.getInt(3);
 							int price = rs.getInt(4);
 							int sum = qty * price;
-							
-							String check1 = "SELECT * FROM precomputedproduser pu WHERE pu.userid = '"+uid+"' AND pu.prodid = '"+uid+"' ";
+							int stateID = 0;
+							System.err.println("uid: " + uid);
+							// find out what state user is from
+							String findState = "SELECT u.state FROM users u WHERE u.id = '"+uid+"' ";
+							rs2 = stmt2.executeQuery(findState);
+							if (rs2.next()) {
+								stateID = rs2.getInt(1);
+							}
+							System.err.println("The users stateID is : " +stateID);
+							String check1 = "SELECT * FROM precomputeproduser pu WHERE pu.userid = '"+uid+"' AND pu.prodid = '"+pid+"' ";
 							System.err.println("check1: ");
 							System.err.println(check1);
 							
 							rs2 = stmt2.executeQuery(check1);
-							if (rs2.next()) { // update precomputedproduser
-								/* UPDATE ProductSales 
-								SET sumamt = sumamt + 10 
-								WHERE product = 23*/
-								stmt2.execute("UPDATE precomputedproduser SET sum = sum + "+sum+" WHERE userid = '"+uid+"' AND prodid = '"+pid+"'");
+							if (rs2.next()) { // update precomputeproduser
+								System.err.println("updating precomputeproduser");
+								stmt2.execute("UPDATE precomputeproduser SET sum = sum + "+sum+" WHERE userid = '"+uid+"' AND prodid = '"+pid+"'");
 							}
-							else { // insert into precomputedproduser
-								stmt2.execute("INSERT INTO precomputedproduser (userid, prodid, sum) VALUES ('"+uid+"', '"+pid+"', '"+sum+"') ");
+							else { // insert into precomputeproduser
+								stmt2.execute("INSERT INTO precomputeproduser (userid, prodid, sum) VALUES ('"+uid+"', '"+pid+"', '"+sum+"') ");
+							}
+							
+							String check2 = "SELECT * FROM precomputeprodstate ps, users u WHERE u.id = '"+uid+"' AND ps.stateid = '"+stateID+"' AND ps.prodid = '"+pid+"';";
+							System.err.println("check2: ");
+							System.err.println(check2);
+							
+							rs2 = stmt2.executeQuery(check2);
+							if (rs2.next()) { // update precomputeprodstate
+								stmt2.execute("UPDATE precomputeprodstate SET sum = sum + "+sum+" WHERE stateid = '"+stateID+"' AND prodid = '"+pid+"' ");
+							}
+							else { // insert into precomputeprodstate
+								stmt2.execute("INSERT INTO precomputeprodstate (stateid, prodid, sum) VALUES ('"+stateID+"', '"+pid+"', '"+sum+"')");
+							}
+							
+							String check3 = "SELECT * FROM precomputeproducts pp WHERE pp.productID = '"+pid+"' ";
+							System.err.println("check3: ");
+							System.err.println(check3);
+							
+							rs2 = stmt2.executeQuery(check3);
+							if (rs2.next()) { // update precomputeproducts
+								stmt2.execute("UPDATE precomputeproducts SET sum = sum + "+sum+" WHERE productID = '"+pid+"' ");
+							}
+							else { // insert into precomputeproducts
+								stmt2.execute("INSERT INTO precomputeproducts (productID, sum) VALUES ('"+pid+"', '"+sum+"')");
+							}
+							
+							String check4 = "SELECT * FROM precomputeusers pu WHERE pu.userID = '"+uid+"' ";
+							System.err.println("check4: ");
+							System.err.println(check4);
+							
+							rs2 = stmt2.executeQuery(check4);
+							if (rs2.next()) { // update precomputeproducts
+								stmt2.execute("UPDATE precomputeusers SET sum = sum + "+sum+" WHERE userID = '"+uid+"' ");
+							}
+							else { // insert into precomputeproducts
+								stmt2.execute("INSERT INTO precomputeusers (userID, sum) VALUES ('"+uid+"', '"+sum+"')");
 							}
 						}
 						
@@ -94,6 +137,7 @@ if(session.getAttribute("name")!=null)
 					}
 					catch(Exception e)
 					{
+						e.printStackTrace();
 						out.println("Fail! Please try again <a href=\"purchase.jsp\" target=\"_self\">Purchase page</a>.<br><br>");
 						
 					}
